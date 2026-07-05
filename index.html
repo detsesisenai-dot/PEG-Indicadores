@@ -1,462 +1,519 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell, LabelList
-} from 'recharts';
-import { AlertCircle, CheckCircle, TrendingUp, Target, Award, Info, Filter } from 'lucide-react';
-
-// --- CONJUNTO DE DADOS EXPANDIDO ---
-const rawData = [
-  // 1. Custo hora-aluno FIC+TEC presencial
-  { DR: 'BA', Meta: 13.04, Realizado: 13.29, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
-  { DR: 'CE', Meta: 11.21, Realizado: 12.88, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
-  { DR: 'GO', Meta: 10.06, Realizado: 10.04, Indicador: 'Custo hora-aluno FIC+TEC presencial' }, 
-  { DR: 'MG', Meta: 11.64, Realizado: 12.48, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
-  { DR: 'PR', Meta: 12.50, Realizado: 11.80, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
-  { DR: 'RJ', Meta: 13.20, Realizado: 14.50, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
-  { DR: 'SP', Meta: 10.50, Realizado: 11.20, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
-  { DR: 'BRASIL', Meta: 12.50, Realizado: 13.10, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
-
-  // 2. Custo hora-aluno FIC+TEC semipresencial/EAD
-  { DR: 'BA', Meta: 8.50, Realizado: 8.10, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
-  { DR: 'CE', Meta: 8.50, Realizado: 7.90, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
-  { DR: 'GO', Meta: 8.50, Realizado: 8.65, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
-  { DR: 'MG', Meta: 8.50, Realizado: 8.20, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
-  { DR: 'PR', Meta: 8.50, Realizado: 7.50, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
-  { DR: 'SP', Meta: 8.50, Realizado: 8.80, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
-  { DR: 'BRASIL', Meta: 8.50, Realizado: 8.35, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
-
-  // 3. % de Recursos destinados às atividades-fim
-  { DR: 'BA', Meta: 70, Realizado: 72, Indicador: '% de Recursos destinados às atividades-fim' },
-  { DR: 'CE', Meta: 70, Realizado: 75, Indicador: '% de Recursos destinados às atividades-fim' },
-  { DR: 'GO', Meta: 70, Realizado: 78, Indicador: '% de Recursos destinados às atividades-fim' },
-  { DR: 'MG', Meta: 70, Realizado: 71, Indicador: '% de Recursos destinados às atividades-fim' },
-  { DR: 'PR', Meta: 70, Realizado: 76, Indicador: '% de Recursos destinados às atividades-fim' },
-  { DR: 'SP', Meta: 70, Realizado: 68, Indicador: '% de Recursos destinados às atividades-fim' },
-  { DR: 'BRASIL', Meta: 70, Realizado: 73, Indicador: '% de Recursos destinados às atividades-fim' },
-
-  // 4. Impacto da folha de pessoal no orçamento
-  { DR: 'BA', Meta: 55, Realizado: 52, Indicador: 'Impacto da folha de pessoal no orçamento' },
-  { DR: 'CE', Meta: 55, Realizado: 50, Indicador: 'Impacto da folha de pessoal no orçamento' },
-  { DR: 'GO', Meta: 55, Realizado: 48, Indicador: 'Impacto da folha de pessoal no orçamento' },
-  { DR: 'MG', Meta: 55, Realizado: 56, Indicador: 'Impacto da folha de pessoal no orçamento' },
-  { DR: 'PR', Meta: 55, Realizado: 49, Indicador: 'Impacto da folha de pessoal no orçamento' },
-  { DR: 'SP', Meta: 55, Realizado: 58, Indicador: 'Impacto da folha de pessoal no orçamento' },
-  { DR: 'BRASIL', Meta: 55, Realizado: 53, Indicador: 'Impacto da folha de pessoal no orçamento' },
-
-  // 5. Sustentabilidade Operacional em Tecnologia e Inovação
-  { DR: 'BA', Meta: 100, Realizado: 95, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
-  { DR: 'CE', Meta: 100, Realizado: 105, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
-  { DR: 'GO', Meta: 100, Realizado: 110, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
-  { DR: 'MG', Meta: 100, Realizado: 98, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
-  { DR: 'PR', Meta: 100, Realizado: 115, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
-  { DR: 'SP', Meta: 100, Realizado: 120, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
-  { DR: 'BRASIL', Meta: 100, Realizado: 102, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
-
-  // 6. % de Conclusão nos cursos FIC presencial
-  { DR: 'BA', Meta: 85, Realizado: 86, Indicador: '% de Conclusão nos cursos FIC presencial' },
-  { DR: 'CE', Meta: 85, Realizado: 88, Indicador: '% de Conclusão nos cursos FIC presencial' },
-  { DR: 'GO', Meta: 85, Realizado: 83, Indicador: '% de Conclusão nos cursos FIC presencial' }, 
-  { DR: 'MG', Meta: 85, Realizado: 87, Indicador: '% de Conclusão nos cursos FIC presencial' },
-  { DR: 'PR', Meta: 85, Realizado: 90, Indicador: '% de Conclusão nos cursos FIC presencial' },
-  { DR: 'SP', Meta: 85, Realizado: 89, Indicador: '% de Conclusão nos cursos FIC presencial' },
-  { DR: 'BRASIL', Meta: 85, Realizado: 86, Indicador: '% de Conclusão nos cursos FIC presencial' },
-
-  // 7. % de Conclusão nos cursos FIC semipresencial/EAD
-  { DR: 'BA', Meta: 75, Realizado: 76, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
-  { DR: 'CE', Meta: 75, Realizado: 78, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
-  { DR: 'GO', Meta: 75, Realizado: 72, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' }, 
-  { DR: 'MG', Meta: 75, Realizado: 74, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
-  { DR: 'PR', Meta: 75, Realizado: 80, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
-  { DR: 'SP', Meta: 75, Realizado: 79, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
-  { DR: 'BRASIL', Meta: 75, Realizado: 77, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
-
-  // 8. % de Conclusão nos cursos TEC semipresencial/EAD
-  { DR: 'BA', Meta: 70, Realizado: 65, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
-  { DR: 'CE', Meta: 70, Realizado: 68, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
-  { DR: 'GO', Meta: 70, Realizado: 71, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' }, 
-  { DR: 'MG', Meta: 70, Realizado: 66, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
-  { DR: 'PR', Meta: 70, Realizado: 72, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
-  { DR: 'SP', Meta: 70, Realizado: 69, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
-  { DR: 'BRASIL', Meta: 70, Realizado: 67, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
-
-  // 9. Aumento da produtividade nas empresas atendidas por programas de produtividade industrial
-  { DR: 'BA', Meta: 0.20, Realizado: 0.31, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
-  { DR: 'CE', Meta: 0.20, Realizado: 0.28, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
-  { DR: 'GO', Meta: 0.20, Realizado: 0.48, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
-  { DR: 'MG', Meta: 0.20, Realizado: 0.35, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
-  { DR: 'PR', Meta: 0.20, Realizado: 0.53, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
-  { DR: 'SP', Meta: 0.20, Realizado: 0.41, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
-  { DR: 'BRASIL', Meta: 0.20, Realizado: 0.38, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
-
-  // 10. % de receita de tecnologia e inovação sobre a receita de contribuição compulsória
-  { DR: 'BA', Meta: 15, Realizado: 12, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
-  { DR: 'CE', Meta: 15, Realizado: 14, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
-  { DR: 'GO', Meta: 15, Realizado: 16, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
-  { DR: 'MG', Meta: 15, Realizado: 13, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
-  { DR: 'PR', Meta: 15, Realizado: 18, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
-  { DR: 'SP', Meta: 15, Realizado: 17, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
-  { DR: 'BRASIL', Meta: 15, Realizado: 14, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
-];
-
-const indicatorRules = {
-  'Custo hora-aluno FIC+TEC presencial': { isHigherBetter: false, format: 'currency' },
-  'Custo hora-aluno FIC+TEC semipresencial/EAD': { isHigherBetter: false, format: 'currency' },
-  '% de Recursos destinados às atividades-fim': { isHigherBetter: true, format: 'percent' },
-  'Impacto da folha de pessoal no orçamento': { isHigherBetter: false, format: 'percent' },
-  'Sustentabilidade Operacional em Tecnologia e Inovação': { isHigherBetter: true, format: 'percent' },
-  '% de Conclusão nos cursos FIC presencial': { isHigherBetter: true, format: 'percent' },
-  '% de Conclusão nos cursos FIC semipresencial/EAD': { isHigherBetter: true, format: 'percent' },
-  '% de Conclusão nos cursos TEC semipresencial/EAD': { isHigherBetter: true, format: 'percent' },
-  'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial': { isHigherBetter: true, format: 'percent_decimal' },
-  '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória': { isHigherBetter: true, format: 'percent' }
-};
-
-const allIndicators = Object.keys(indicatorRules);
-
-const colors = {
-  bg: '#FFFFFF',
-  text: '#1F2937', 
-  cardBg: '#374151', 
-  cyan: '#06B6D4', 
-  success: '#10B981',
-  warning: '#EF4444'
-};
-
-// Formatação à prova de falhas para evitar crashes
-const formatValue = (val, formatType) => {
-  if (val === undefined || val === null || isNaN(val)) return '-';
-  const numVal = Number(val);
-  if (formatType === 'currency') return `R$ ${numVal.toFixed(2).replace('.', ',')}`;
-  if (formatType === 'percent_decimal') return `${(numVal * 100).toFixed(1).replace('.', ',')}%`;
-  if (formatType === 'percent') return `${numVal.toFixed(0)}%`;
-  return numVal;
-};
-
-export default function App() {
-  const [filterCategory, setFilterCategory] = useState('Todos');
-  const [selectedIndicator, setSelectedIndicator] = useState(allIndicators[0]);
-
-  // INJEÇÃO AUTOMÁTICA DO TAILWIND PARA O GITHUB PAGES
-  // Isso garante que o layout não fique "corrompido" se a hospedagem não possuir o processamento CSS configurado.
-  useEffect(() => {
-    if (typeof window !== 'undefined' && !document.getElementById('tailwind-cdn')) {
-      const script = document.createElement('script');
-      script.id = 'tailwind-cdn';
-      script.src = 'https://cdn.tailwindcss.com';
-      document.head.appendChild(script);
-    }
-  }, []);
-
-  // Lógica de Classificação de Destaques vs Atenção para o DR Goiás
-  const indicatorStatusMap = useMemo(() => {
-    const statusMap = {};
-    allIndicators.forEach(ind => {
-      const rule = indicatorRules[ind];
-      const goData = rawData.find(d => d.Indicador === ind && d.DR === 'GO');
-      if (!goData) {
-        statusMap[ind] = 'Sem Dados';
-      } else {
-        const achieved = rule.isHigherBetter ? goData.Realizado >= goData.Meta : goData.Realizado <= goData.Meta;
-        statusMap[ind] = achieved ? 'Destaques' : 'Atenção';
-      }
-    });
-    return statusMap;
-  }, []);
-
-  // Filtra a lista do dropdown com base na categoria escolhida
-  const filteredIndicatorsList = useMemo(() => {
-    if (filterCategory === 'Todos') return allIndicators;
-    return allIndicators.filter(ind => indicatorStatusMap[ind] === filterCategory);
-  }, [filterCategory, indicatorStatusMap]);
-
-  // Efeito para auto-selecionar o primeiro item da lista filtrada se o atual for removido
-  useEffect(() => {
-    if (filteredIndicatorsList.length > 0 && !filteredIndicatorsList.includes(selectedIndicator)) {
-      setSelectedIndicator(filteredIndicatorsList[0]);
-    }
-  }, [filteredIndicatorsList, selectedIndicator]);
-
-  // Processamento de dados do indicador selecionado
-  const processedData = useMemo(() => {
-    let filtered = rawData.filter(d => d.Indicador === selectedIndicator && d.DR !== 'BRASIL');
-    const brasilData = rawData.find(d => d.Indicador === selectedIndicator && d.DR === 'BRASIL');
-    const rule = indicatorRules[selectedIndicator] || { isHigherBetter: true, format: 'percent' };
-
-    filtered.sort((a, b) => rule.isHigherBetter ? b.Realizado - a.Realizado : a.Realizado - b.Realizado);
-    return { ranking: filtered, brasil: brasilData, rule };
-  }, [selectedIndicator]);
-
-  const { ranking, brasil, rule } = processedData;
-  const goiasData = ranking.find(d => d.DR === 'GO');
-  
-  const targetAchieved = goiasData 
-    ? (rule.isHigherBetter ? goiasData.Realizado >= goiasData.Meta : goiasData.Realizado <= goiasData.Meta)
-    : false;
-
-  const goiasRank = ranking.findIndex(d => d.DR === 'GO') + 1;
-
-  // Geração Dinâmica de Insights
-  const generateInsights = () => {
-    if (!goiasData) return { points: [], attention: [] };
-
-    const diffToMeta = Math.abs(goiasData.Realizado - goiasData.Meta);
-    const pctDiffToMeta = goiasData.Meta !== 0 ? (diffToMeta / goiasData.Meta) * 100 : 0;
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Estratégico PEG - DR Goiás</title>
     
-    let points = [];
-    let attention = [];
+    <!-- Tailwind CSS para estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React e ReactDOM (Versões fixadas em 18.2.0 para maior estabilidade UMD) -->
+    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel para compilar o JSX no navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Dependência do Recharts -->
+    <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+    
+    <!-- Recharts (Versão 2.12.7 fixada, pois a 3.x apresenta instabilidade em builds UMD) -->
+    <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
 
-    if (targetAchieved) {
-      points.push(`Goiás cumpriu a meta estipulada (${formatValue(goiasData.Meta, rule.format)}), registando ${formatValue(goiasData.Realizado, rule.format)}.`);
-      if (pctDiffToMeta > 10) {
-        points.push(rule.isHigherBetter 
-          ? `Desempenho de excelência, superando a meta em mais de ${pctDiffToMeta.toFixed(0)}%.`
-          : `Otimização de alta eficiência, com resultado ${pctDiffToMeta.toFixed(0)}% melhor que o teto da meta.`);
-      }
-    } else {
-      attention.push(`O resultado atual de ${formatValue(goiasData.Realizado, rule.format)} está fora da meta ideal de ${formatValue(goiasData.Meta, rule.format)}.`);
-      attention.push(`Recomenda-se revisão estratégica focada em ${rule.isHigherBetter ? 'alavancar processos produtivos' : 'contenção de custos e eficiência operacional'}.`);
-    }
-
-    const topTertile = Math.ceil(ranking.length / 3);
-    if (goiasRank <= topTertile && goiasRank > 0) {
-      points.push(`O DR Goiás é destaque nacional, ocupando a ${goiasRank}ª posição entre os estados analisados, refletindo alta competitividade.`);
-    } else if (goiasRank > ranking.length - topTertile) {
-      attention.push(`No ranking nacional, o estado está no terço inferior (${goiasRank}º lugar), indicando oportunidade de benchmarking com outros DRs.`);
-    } else if (goiasRank > 0) {
-      points.push(`O estado mantém uma posição intermediária (${goiasRank}º lugar) no cenário nacional, apresentando estabilidade.`);
-    }
-
-    if (brasil) {
-      const betterThanBr = rule.isHigherBetter ? goiasData.Realizado > brasil.Realizado : goiasData.Realizado < brasil.Realizado;
-      if (betterThanBr) {
-        points.push(`A performance estadual supera a média nacional do sistema SENAI (${formatValue(brasil.Realizado, rule.format)}).`);
-      } else {
-        attention.push(`Indicador performando de forma menos eficiente do que a média consolidada do Brasil (${formatValue(brasil.Realizado, rule.format)}).`);
-      }
-    }
-
-    return { points, attention };
-  };
-
-  const insights = generateInsights();
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-gray-800 text-white p-4 rounded-lg shadow-xl border border-gray-700">
-          <p className="font-bold text-cyan-500 mb-2">{label === 'GO' ? '📍 DR GOIÁS' : `DR ${label}`}</p>
-          <p className="text-sm">Realizado: <span className="font-bold">{formatValue(data.Realizado, rule.format)}</span></p>
-          <p className="text-sm text-gray-400">Meta: {formatValue(data.Meta, rule.format)}</p>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  return (
-    <div className="min-h-screen bg-white text-gray-800 font-['Helvetica',_Arial,_sans-serif] p-4 md:p-8">
-      
-      {/* CABEÇALHO E FILTROS */}
-      <header className="mb-8 flex flex-col xl:flex-row justify-between items-start xl:items-center border-b-2 border-gray-200 pb-6 gap-6">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-black text-gray-800 tracking-tight">
-            Painel Estratégico <span className="text-cyan-500">PEG</span>
-          </h1>
-          <p className="text-gray-500 font-medium mt-1 uppercase tracking-widest text-sm">Monitorização DR Goiás • Jan a Mai 2026</p>
-        </div>
-        
-        <div className="flex flex-col gap-4 w-full xl:w-auto">
-          {/* Botões de Filtro de Categoria */}
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1 mr-2"><Filter size={14} /> Filtro de Desempenho:</span>
-            {['Todos', 'Destaques', 'Atenção'].map(cat => (
-              <button
-                key={cat}
-                onClick={() => setFilterCategory(cat)}
-                className={`px-4 py-2 rounded-full text-xs font-bold uppercase transition-all ${
-                  filterCategory === cat 
-                    ? cat === 'Destaques' ? 'bg-green-500 text-white shadow-lg' 
-                      : cat === 'Atenção' ? 'bg-red-500 text-white shadow-lg' 
-                      : 'bg-cyan-500 text-white shadow-lg'
-                    : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          {/* Seleção de Indicador Dinâmico */}
-          {filteredIndicatorsList.length > 0 ? (
-            <select 
-              className="w-full xl:w-96 bg-gray-800 text-white border-none rounded-lg p-3 outline-none focus:ring-2 focus:ring-cyan-500 font-medium cursor-pointer shadow-lg transition-all hover:bg-gray-700 text-sm"
-              value={selectedIndicator}
-              onChange={(e) => setSelectedIndicator(e.target.value)}
-            >
-              {filteredIndicatorsList.map(ind => (
-                <option key={ind} value={ind}>{ind}</option>
-              ))}
-            </select>
-          ) : (
-            <div className="w-full xl:w-96 bg-gray-100 text-gray-400 rounded-lg p-3 text-sm font-medium border border-gray-200">
-              Nenhum indicador encontrado para este filtro.
-            </div>
-          )}
-        </div>
-      </header>
-
-      {goiasData ? (
-        <>
-          {/* CARTÕES KPI */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div className="bg-gray-800 p-6 rounded-2xl shadow-lg border-l-4 border-cyan-500 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:scale-110 transition-transform"><Target size={48} color="#06B6D4"/></div>
-              <p className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">Resultado GO</p>
-              <h2 className="text-3xl font-black text-white">{formatValue(goiasData.Realizado, rule.format)}</h2>
-              <p className="text-cyan-400 text-sm mt-2 font-medium">Meta: {formatValue(goiasData.Meta, rule.format)}</p>
-            </div>
-
-            <div className={`p-6 rounded-2xl shadow-lg border-l-4 relative overflow-hidden ${targetAchieved ? 'bg-gray-800 border-green-500' : 'bg-gray-800 border-red-500'}`}>
-              <div className="absolute top-0 right-0 p-4 opacity-20"><Award size={48} color={targetAchieved ? '#10B981' : '#EF4444'}/></div>
-              <p className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">Estado da Meta</p>
-              <div className="flex items-center gap-2 mt-1">
-                {targetAchieved ? <CheckCircle color="#10B981" size={28}/> : <AlertCircle color="#EF4444" size={28}/>}
-                <h2 className={`text-2xl font-black ${targetAchieved ? 'text-green-400' : 'text-red-400'}`}>
-                  {targetAchieved ? 'Destaque Alcançado' : 'Ponto de Atenção'}
-                </h2>
-              </div>
-              <p className="text-gray-400 text-xs mt-2">{rule.isHigherBetter ? 'Maior é melhor' : 'Menor é melhor'}</p>
-            </div>
-
-            <div className="bg-gray-800 p-6 rounded-2xl shadow-lg border-l-4 border-gray-600 relative overflow-hidden">
-               <div className="absolute top-0 right-0 p-4 opacity-20"><TrendingUp size={48} color="#9CA3AF"/></div>
-              <p className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">Ranking Nacional</p>
-              <div className="flex items-baseline gap-1">
-                <h2 className="text-3xl font-black text-white">{goiasRank > 0 ? `${goiasRank}º` : '-'}</h2>
-                <span className="text-gray-400 font-medium">/ {ranking.length}</span>
-              </div>
-            </div>
-
-            <div className="bg-gray-800 p-6 rounded-2xl shadow-lg border-l-4 border-gray-600 relative overflow-hidden">
-               <div className="absolute top-0 right-0 p-4 opacity-20"><Info size={48} color="#9CA3AF"/></div>
-              <p className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-1">Média Brasil</p>
-              <h2 className="text-3xl font-black text-white">{brasil ? formatValue(brasil.Realizado, rule.format) : '-'}</h2>
-            </div>
-          </div>
-
-          {/* GRELHA DE CONTEÚDO PRINCIPAL */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            
-            {/* SECÇÃO DO GRÁFICO (Com cor Dinâmica refletindo Destaque/Atenção) */}
-            <div className="xl:col-span-2 bg-gray-50 rounded-3xl p-6 border border-gray-200 shadow-inner">
-              <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <BarChart className="w-5 h-5 text-cyan-500" /> 
-                Ranking de Desempenho por Estado
-              </h3>
-              {/* Estilos inline adicionados na div abaixo para evitar colapso do Recharts se as classes falharem */}
-              <div style={{ width: '100%', height: '400px' }} className="w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={ranking} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                    <XAxis 
-                      dataKey="DR" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fill: '#4B5563', fontWeight: 'bold' }} 
-                    />
-                    <YAxis hide domain={[0, 'dataMax + (dataMax * 0.1)']} />
-                    <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F3F4F6' }} />
-                    
-                    <ReferenceLine 
-                      y={goiasData.Meta} 
-                      stroke="#4B5563" 
-                      strokeDasharray="5 5" 
-                      label={{ position: 'top', value: `Meta: ${formatValue(goiasData.Meta, rule.format)}`, fill: '#4B5563', fontSize: 12, fontWeight: 'bold' }} 
-                    />
-                    
-                    <Bar dataKey="Realizado" radius={[6, 6, 0, 0]} maxBarSize={50}>
-                      {ranking.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={entry.DR === 'GO' ? (targetAchieved ? colors.success : colors.warning) : colors.cardBg} 
-                          className="transition-all duration-300 hover:opacity-80"
-                        />
-                      ))}
-                      <LabelList 
-                        dataKey="Realizado" 
-                        position="top" 
-                        formatter={(val) => formatValue(val, rule.format).replace('R$', '').replace('%', '')}
-                        style={{ fill: '#4B5563', fontSize: '11px', fontWeight: 'bold' }}
-                      />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* SECÇÃO DE INSIGHTS */}
-            <div className="flex flex-col gap-4">
-              <div className="bg-gray-800 rounded-3xl p-6 shadow-xl flex-1 flex flex-col">
-                <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2 border-b border-gray-700 pb-4">
-                  <TrendingUp className="text-cyan-500" />
-                  Insights Estratégicos DR-GO
-                </h3>
-                
-                <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                  {insights.points.length > 0 && (
-                    <div className="mb-6">
-                      <h4 className="text-green-400 font-bold uppercase text-xs tracking-widest mb-3 flex items-center gap-2">
-                        <CheckCircle size={16} /> Pontos Positivos
-                      </h4>
-                      <ul className="space-y-3">
-                        {insights.points.map((point, i) => (
-                          <li key={i} className="text-gray-300 text-sm leading-relaxed flex items-start gap-2 bg-gray-700/50 p-3 rounded-lg border-l-2 border-green-500">
-                            {point}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {insights.attention.length > 0 && (
-                    <div>
-                      <h4 className="text-red-400 font-bold uppercase text-xs tracking-widest mb-3 flex items-center gap-2">
-                        <AlertCircle size={16} /> Pontos de Atenção
-                      </h4>
-                      <ul className="space-y-3">
-                        {insights.attention.map((att, i) => (
-                          <li key={i} className="text-gray-300 text-sm leading-relaxed flex items-start gap-2 bg-red-900/20 border border-red-900/30 p-3 rounded-lg border-l-2 border-red-500">
-                            {att}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </>
-      ) : (
-        <div className="flex items-center justify-center h-64 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300 mt-8">
-          <p className="text-gray-500 font-medium">Selecione um filtro ou indicador válido acima.</p>
-        </div>
-      )}
-
-      {/* RODAPÉ */}
-      <footer className="mt-12 text-center text-xs text-gray-400 font-medium pb-4 border-t border-gray-100 pt-6">
-        Relatório Gerencial • Baseado nas métricas PEG Janeiro a Maio de 2026 • Inteligência de Dados
-      </footer>
-
-      {/* Estilos Globais para scrollbar */}
-      <style dangerouslySetInnerHTML={{__html: `
+    <style>
+        body { margin: 0; padding: 0; font-family: Helvetica, Arial, sans-serif; background-color: #ffffff; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #374151; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #06B6D4; }
-      `}} />
-    </div>
-  );
-}
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // Importando os hooks do React global
+        const { useState, useMemo, useEffect } = React;
+        
+        // Importando os componentes do Recharts global
+        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell, LabelList } = window.Recharts;
+        
+        // =========================================================================
+        // ÍCONES NATIVOS (Substituem o lucide-react para evitar erros de dependência)
+        // =========================================================================
+        const AlertCircle = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
+            <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        );
+        const CheckCircle = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        );
+        const TrendingUp = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline>
+          </svg>
+        );
+        const Target = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
+            <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle>
+          </svg>
+        );
+        const Award = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
+            <circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+          </svg>
+        );
+        const Info = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
+            <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+        );
+        const Filter = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+        );
+
+        // --- CONJUNTO DE DADOS EXPANDIDO ---
+        const rawData = [
+          // 1. Custo hora-aluno FIC+TEC presencial
+          { DR: 'BA', Meta: 13.04, Realizado: 13.29, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
+          { DR: 'CE', Meta: 11.21, Realizado: 12.88, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
+          { DR: 'GO', Meta: 10.06, Realizado: 10.04, Indicador: 'Custo hora-aluno FIC+TEC presencial' }, 
+          { DR: 'MG', Meta: 11.64, Realizado: 12.48, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
+          { DR: 'PR', Meta: 12.50, Realizado: 11.80, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
+          { DR: 'RJ', Meta: 13.20, Realizado: 14.50, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
+          { DR: 'SP', Meta: 10.50, Realizado: 11.20, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
+          { DR: 'BRASIL', Meta: 12.50, Realizado: 13.10, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
+
+          // 2. Custo hora-aluno FIC+TEC semipresencial/EAD
+          { DR: 'BA', Meta: 8.50, Realizado: 8.10, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
+          { DR: 'CE', Meta: 8.50, Realizado: 7.90, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
+          { DR: 'GO', Meta: 8.50, Realizado: 8.65, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
+          { DR: 'MG', Meta: 8.50, Realizado: 8.20, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
+          { DR: 'PR', Meta: 8.50, Realizado: 7.50, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
+          { DR: 'SP', Meta: 8.50, Realizado: 8.80, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
+          { DR: 'BRASIL', Meta: 8.50, Realizado: 8.35, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
+
+          // 3. % de Recursos destinados às atividades-fim
+          { DR: 'BA', Meta: 70, Realizado: 72, Indicador: '% de Recursos destinados às atividades-fim' },
+          { DR: 'CE', Meta: 70, Realizado: 75, Indicador: '% de Recursos destinados às atividades-fim' },
+          { DR: 'GO', Meta: 70, Realizado: 78, Indicador: '% de Recursos destinados às atividades-fim' },
+          { DR: 'MG', Meta: 70, Realizado: 71, Indicador: '% de Recursos destinados às atividades-fim' },
+          { DR: 'PR', Meta: 70, Realizado: 76, Indicador: '% de Recursos destinados às atividades-fim' },
+          { DR: 'SP', Meta: 70, Realizado: 68, Indicador: '% de Recursos destinados às atividades-fim' },
+          { DR: 'BRASIL', Meta: 70, Realizado: 73, Indicador: '% de Recursos destinados às atividades-fim' },
+
+          // 4. Impacto da folha de pessoal no orçamento
+          { DR: 'BA', Meta: 55, Realizado: 52, Indicador: 'Impacto da folha de pessoal no orçamento' },
+          { DR: 'CE', Meta: 55, Realizado: 50, Indicador: 'Impacto da folha de pessoal no orçamento' },
+          { DR: 'GO', Meta: 55, Realizado: 48, Indicador: 'Impacto da folha de pessoal no orçamento' },
+          { DR: 'MG', Meta: 55, Realizado: 56, Indicador: 'Impacto da folha de pessoal no orçamento' },
+          { DR: 'PR', Meta: 55, Realizado: 49, Indicador: 'Impacto da folha de pessoal no orçamento' },
+          { DR: 'SP', Meta: 55, Realizado: 58, Indicador: 'Impacto da folha de pessoal no orçamento' },
+          { DR: 'BRASIL', Meta: 55, Realizado: 53, Indicador: 'Impacto da folha de pessoal no orçamento' },
+
+          // 5. Sustentabilidade Operacional em Tecnologia e Inovação
+          { DR: 'BA', Meta: 100, Realizado: 95, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
+          { DR: 'CE', Meta: 100, Realizado: 105, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
+          { DR: 'GO', Meta: 100, Realizado: 110, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
+          { DR: 'MG', Meta: 100, Realizado: 98, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
+          { DR: 'PR', Meta: 100, Realizado: 115, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
+          { DR: 'SP', Meta: 100, Realizado: 120, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
+          { DR: 'BRASIL', Meta: 100, Realizado: 102, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
+
+          // 6. % de Conclusão nos cursos FIC presencial
+          { DR: 'BA', Meta: 85, Realizado: 86, Indicador: '% de Conclusão nos cursos FIC presencial' },
+          { DR: 'CE', Meta: 85, Realizado: 88, Indicador: '% de Conclusão nos cursos FIC presencial' },
+          { DR: 'GO', Meta: 85, Realizado: 83, Indicador: '% de Conclusão nos cursos FIC presencial' }, 
+          { DR: 'MG', Meta: 85, Realizado: 87, Indicador: '% de Conclusão nos cursos FIC presencial' },
+          { DR: 'PR', Meta: 85, Realizado: 90, Indicador: '% de Conclusão nos cursos FIC presencial' },
+          { DR: 'SP', Meta: 85, Realizado: 89, Indicador: '% de Conclusão nos cursos FIC presencial' },
+          { DR: 'BRASIL', Meta: 85, Realizado: 86, Indicador: '% de Conclusão nos cursos FIC presencial' },
+
+          // 7. % de Conclusão nos cursos FIC semipresencial/EAD
+          { DR: 'BA', Meta: 75, Realizado: 76, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
+          { DR: 'CE', Meta: 75, Realizado: 78, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
+          { DR: 'GO', Meta: 75, Realizado: 72, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' }, 
+          { DR: 'MG', Meta: 75, Realizado: 74, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
+          { DR: 'PR', Meta: 75, Realizado: 80, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
+          { DR: 'SP', Meta: 75, Realizado: 79, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
+          { DR: 'BRASIL', Meta: 75, Realizado: 77, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
+
+          // 8. % de Conclusão nos cursos TEC semipresencial/EAD
+          { DR: 'BA', Meta: 70, Realizado: 65, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
+          { DR: 'CE', Meta: 70, Realizado: 68, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
+          { DR: 'GO', Meta: 70, Realizado: 71, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' }, 
+          { DR: 'MG', Meta: 70, Realizado: 66, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
+          { DR: 'PR', Meta: 70, Realizado: 72, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
+          { DR: 'SP', Meta: 70, Realizado: 69, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
+          { DR: 'BRASIL', Meta: 70, Realizado: 67, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
+
+          // 9. Aumento da produtividade nas empresas atendidas por programas de produtividade industrial
+          { DR: 'BA', Meta: 0.20, Realizado: 0.31, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
+          { DR: 'CE', Meta: 0.20, Realizado: 0.28, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
+          { DR: 'GO', Meta: 0.20, Realizado: 0.48, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
+          { DR: 'MG', Meta: 0.20, Realizado: 0.35, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
+          { DR: 'PR', Meta: 0.20, Realizado: 0.53, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
+          { DR: 'SP', Meta: 0.20, Realizado: 0.41, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
+          { DR: 'BRASIL', Meta: 0.20, Realizado: 0.38, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
+
+          // 10. % de receita de tecnologia e inovação sobre a receita de contribuição compulsória
+          { DR: 'BA', Meta: 15, Realizado: 12, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
+          { DR: 'CE', Meta: 15, Realizado: 14, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
+          { DR: 'GO', Meta: 15, Realizado: 16, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
+          { DR: 'MG', Meta: 15, Realizado: 13, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
+          { DR: 'PR', Meta: 15, Realizado: 18, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
+          { DR: 'SP', Meta: 15, Realizado: 17, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
+          { DR: 'BRASIL', Meta: 15, Realizado: 14, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
+        ];
+
+        const indicatorRules = {
+          'Custo hora-aluno FIC+TEC presencial': { isHigherBetter: false, format: 'currency' },
+          'Custo hora-aluno FIC+TEC semipresencial/EAD': { isHigherBetter: false, format: 'currency' },
+          '% de Recursos destinados às atividades-fim': { isHigherBetter: true, format: 'percent' },
+          'Impacto da folha de pessoal no orçamento': { isHigherBetter: false, format: 'percent' },
+          'Sustentabilidade Operacional em Tecnologia e Inovação': { isHigherBetter: true, format: 'percent' },
+          '% de Conclusão nos cursos FIC presencial': { isHigherBetter: true, format: 'percent' },
+          '% de Conclusão nos cursos FIC semipresencial/EAD': { isHigherBetter: true, format: 'percent' },
+          '% de Conclusão nos cursos TEC semipresencial/EAD': { isHigherBetter: true, format: 'percent' },
+          'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial': { isHigherBetter: true, format: 'percent_decimal' },
+          '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória': { isHigherBetter: true, format: 'percent' }
+        };
+
+        const allIndicators = Object.keys(indicatorRules);
+
+        const colors = {
+          bg: '#FFFFFF',
+          text: '#1F2937', 
+          cardBg: '#374151', 
+          cyan: '#06B6D4', 
+          success: '#10B981',
+          warning: '#EF4444'
+        };
+
+        // Formatação robusta de números
+        const formatValue = (val, formatType) => {
+          if (val === undefined || val === null || isNaN(val)) return '-';
+          const numVal = Number(val);
+          if (formatType === 'currency') return `R$ ${numVal.toFixed(2).replace('.', ',')}`;
+          if (formatType === 'percent_decimal') return `${(numVal * 100).toFixed(1).replace('.', ',')}%`;
+          if (formatType === 'percent') return `${numVal.toFixed(0)}%`;
+          return numVal;
+        };
+
+        function App() {
+          const [filterCategory, setFilterCategory] = useState('Todos');
+          const [selectedIndicator, setSelectedIndicator] = useState(allIndicators[0]);
+
+          const indicatorStatusMap = useMemo(() => {
+            const statusMap = {};
+            allIndicators.forEach(ind => {
+              const rule = indicatorRules[ind];
+              const goData = rawData.find(d => d.Indicador === ind && d.DR === 'GO');
+              if (!goData) {
+                statusMap[ind] = 'Sem Dados';
+              } else {
+                const achieved = rule.isHigherBetter ? goData.Realizado >= goData.Meta : goData.Realizado <= goData.Meta;
+                statusMap[ind] = achieved ? 'Destaques' : 'Atenção';
+              }
+            });
+            return statusMap;
+          }, []);
+
+          const filteredIndicatorsList = useMemo(() => {
+            if (filterCategory === 'Todos') return allIndicators;
+            return allIndicators.filter(ind => indicatorStatusMap[ind] === filterCategory);
+          }, [filterCategory, indicatorStatusMap]);
+
+          useEffect(() => {
+            if (filteredIndicatorsList.length > 0 && !filteredIndicatorsList.includes(selectedIndicator)) {
+              setSelectedIndicator(filteredIndicatorsList[0]);
+            }
+          }, [filteredIndicatorsList, selectedIndicator]);
+
+          const processedData = useMemo(() => {
+            let filtered = rawData.filter(d => d.Indicador === selectedIndicator && d.DR !== 'BRASIL');
+            const brasilData = rawData.find(d => d.Indicador === selectedIndicator && d.DR === 'BRASIL');
+            const rule = indicatorRules[selectedIndicator] || { isHigherBetter: true, format: 'percent' };
+
+            filtered.sort((a, b) => rule.isHigherBetter ? b.Realizado - a.Realizado : a.Realizado - b.Realizado);
+            return { ranking: filtered, brasil: brasilData, rule };
+          }, [selectedIndicator]);
+
+          const { ranking, brasil, rule } = processedData;
+          const goiasData = ranking.find(d => d.DR === 'GO');
+          
+          const targetAchieved = goiasData 
+            ? (rule.isHigherBetter ? goiasData.Realizado >= goiasData.Meta : goiasData.Realizado <= goiasData.Meta)
+            : false;
+
+          const goiasRank = ranking.findIndex(d => d.DR === 'GO') + 1;
+
+          const generateInsights = () => {
+            if (!goiasData) return { points: [], attention: [] };
+
+            const diffToMeta = Math.abs(goiasData.Realizado - goiasData.Meta);
+            const pctDiffToMeta = goiasData.Meta !== 0 ? (diffToMeta / goiasData.Meta) * 100 : 0;
+            
+            let points = [];
+            let attention = [];
+
+            if (targetAchieved) {
+              points.push(`Goiás cumpriu a meta estipulada (${formatValue(goiasData.Meta, rule.format)}), registando ${formatValue(goiasData.Realizado, rule.format)}.`);
+              if (pctDiffToMeta > 10) {
+                points.push(rule.isHigherBetter 
+                  ? `Desempenho de excelência, superando a meta em mais de ${pctDiffToMeta.toFixed(0)}%.`
+                  : `Otimização de alta eficiência, com resultado ${pctDiffToMeta.toFixed(0)}% melhor que o teto da meta.`);
+              }
+            } else {
+              attention.push(`O resultado atual de ${formatValue(goiasData.Realizado, rule.format)} está fora da meta ideal de ${formatValue(goiasData.Meta, rule.format)}.`);
+              attention.push(`Recomenda-se revisão estratégica focada em ${rule.isHigherBetter ? 'alavancar processos produtivos' : 'contenção de custos e eficiência operacional'}.`);
+            }
+
+            const topTertile = Math.ceil(ranking.length / 3);
+            if (goiasRank <= topTertile && goiasRank > 0) {
+              points.push(`O DR Goiás é destaque nacional, ocupando a ${goiasRank}ª posição entre os estados analisados, refletindo alta competitividade.`);
+            } else if (goiasRank > ranking.length - topTertile) {
+              attention.push(`No ranking nacional, o estado está no terço inferior (${goiasRank}º lugar), indicando oportunidade de benchmarking com outros DRs.`);
+            } else if (goiasRank > 0) {
+              points.push(`O estado mantém uma posição intermediária (${goiasRank}º lugar) no cenário nacional, apresentando estabilidade.`);
+            }
+
+            if (brasil) {
+              const betterThanBr = rule.isHigherBetter ? goiasData.Realizado > brasil.Realizado : goiasData.Realizado < brasil.Realizado;
+              if (betterThanBr) {
+                points.push(`A performance estadual supera a média nacional do sistema SENAI (${formatValue(brasil.Realizado, rule.format)}).`);
+              } else {
+                attention.push(`Indicador performando de forma menos eficiente do que a média consolidada do Brasil (${formatValue(brasil.Realizado, rule.format)}).`);
+              }
+            }
+
+            return { points, attention };
+          };
+
+          const insights = generateInsights();
+
+          const CustomTooltip = ({ active, payload, label }) => {
+            if (active && payload && payload.length) {
+              const data = payload[0].payload;
+              return (
+                <div className="bg-gray-800 text-white p-4 rounded-lg shadow-xl border border-gray-700">
+                  <p className="font-bold text-cyan-500 mb-2">{label === 'GO' ? '📍 DR GOIÁS' : `DR ${label}`}</p>
+                  <p className="text-sm">Realizado: <span className="font-bold">{formatValue(data.Realizado, rule.format)}</span></p>
+                  <p className="text-sm text-gray-400">Meta: {formatValue(data.Meta, rule.format)}</p>
+                </div>
+              );
+            }
+            return null;
+          };
+
+          return (
+            <div className="min-h-screen bg-white text-gray-800 p-4 md:p-8 w-full">
+              {/* CABEÇALHO E FILTROS */}
+              <header className="mb-8 flex flex-col xl:flex-row justify-between items-start xl:items-center border-b-2 border-gray-200 pb-6 gap-6">
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-black tracking-tight text-gray-800">
+                    Painel Estratégico <span className="text-cyan-500">PEG</span>
+                  </h1>
+                  <p className="text-gray-500 font-medium mt-1 uppercase tracking-widest text-sm">
+                    Monitorização DR Goiás • Jan a Mai 2026
+                  </p>
+                </div>
+                
+                <div className="flex flex-col gap-4 w-full xl:w-auto">
+                  <div className="flex flex-wrap gap-2 items-center">
+                    <span className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1 mr-2">
+                      <Filter size={14} /> Filtro de Desempenho:
+                    </span>
+                    {['Todos', 'Destaques', 'Atenção'].map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => setFilterCategory(cat)}
+                        className={`px-4 py-2 rounded-full text-xs font-bold uppercase transition-all ${
+                          filterCategory === cat 
+                            ? cat === 'Destaques' ? 'bg-emerald-500 text-white shadow-lg' 
+                              : cat === 'Atenção' ? 'bg-red-500 text-white shadow-lg' 
+                              : 'bg-cyan-500 text-white shadow-lg'
+                            : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+
+                  {filteredIndicatorsList.length > 0 ? (
+                    <select 
+                      className="w-full xl:w-96 rounded-lg p-3 outline-none font-medium cursor-pointer shadow-lg transition-all text-sm bg-gray-800 text-white border-none"
+                      value={selectedIndicator}
+                      onChange={(e) => setSelectedIndicator(e.target.value)}
+                    >
+                      {filteredIndicatorsList.map(ind => (
+                        <option key={ind} value={ind}>{ind}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="w-full xl:w-96 bg-gray-100 text-gray-400 rounded-lg p-3 text-sm font-medium border border-gray-200">
+                      Nenhum indicador encontrado para este filtro.
+                    </div>
+                  )}
+                </div>
+              </header>
+
+              {goiasData ? (
+                <>
+                  {/* CARTÕES KPI */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div className="p-6 rounded-2xl shadow-lg relative overflow-hidden group bg-gray-800 border-l-4 border-cyan-500">
+                      <div className="absolute top-0 right-0 p-4 opacity-20"><Target size={48} color="#06B6D4"/></div>
+                      <p className="text-sm font-bold uppercase tracking-wider mb-1 text-gray-400">Resultado GO</p>
+                      <h2 className="text-3xl font-black text-white">{formatValue(goiasData.Realizado, rule.format)}</h2>
+                      <p className="text-sm mt-2 font-medium text-cyan-400">Meta: {formatValue(goiasData.Meta, rule.format)}</p>
+                    </div>
+
+                    <div className={`p-6 rounded-2xl shadow-lg relative overflow-hidden bg-gray-800 border-l-4 ${targetAchieved ? 'border-emerald-500' : 'border-red-500'}`}>
+                      <div className="absolute top-0 right-0 p-4 opacity-20"><Award size={48} color={targetAchieved ? '#10B981' : '#EF4444'}/></div>
+                      <p className="text-sm font-bold uppercase tracking-wider mb-1 text-gray-400">Estado da Meta</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        {targetAchieved ? <CheckCircle color="#10B981" size={28}/> : <AlertCircle color="#EF4444" size={28}/>}
+                        <h2 className={`text-2xl font-black ${targetAchieved ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {targetAchieved ? 'Destaque Alcançado' : 'Ponto de Atenção'}
+                        </h2>
+                      </div>
+                      <p className="text-xs mt-2 text-gray-400">{rule.isHigherBetter ? 'Maior é melhor' : 'Menor é melhor'}</p>
+                    </div>
+
+                    <div className="p-6 rounded-2xl shadow-lg relative overflow-hidden bg-gray-800 border-l-4 border-gray-600">
+                       <div className="absolute top-0 right-0 p-4 opacity-20"><TrendingUp size={48} color="#9CA3AF"/></div>
+                      <p className="text-sm font-bold uppercase tracking-wider mb-1 text-gray-400">Ranking Nacional</p>
+                      <div className="flex items-baseline gap-1">
+                        <h2 className="text-3xl font-black text-white">{goiasRank > 0 ? `${goiasRank}º` : '-'}</h2>
+                        <span className="font-medium text-gray-400">/ {ranking.length}</span>
+                      </div>
+                    </div>
+
+                    <div className="p-6 rounded-2xl shadow-lg relative overflow-hidden bg-gray-800 border-l-4 border-gray-600">
+                       <div className="absolute top-0 right-0 p-4 opacity-20"><Info size={48} color="#9CA3AF"/></div>
+                      <p className="text-sm font-bold uppercase tracking-wider mb-1 text-gray-400">Média Brasil</p>
+                      <h2 className="text-3xl font-black text-white">{brasil ? formatValue(brasil.Realizado, rule.format) : '-'}</h2>
+                    </div>
+                  </div>
+
+                  {/* GRELHA DE CONTEÚDO PRINCIPAL */}
+                  <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                    
+                    {/* SECÇÃO DO GRÁFICO */}
+                    <div className="bg-gray-50 rounded-3xl p-6 border border-gray-200 shadow-inner xl:col-span-2">
+                      <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-gray-800">
+                        <span className="text-cyan-500"><TrendingUp size={24} /></span> 
+                        Ranking de Desempenho por Estado
+                      </h3>
+                      
+                      <div style={{ width: '100%', height: '400px' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={ranking} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                            <XAxis 
+                              dataKey="DR" 
+                              axisLine={false} 
+                              tickLine={false} 
+                              tick={{ fill: '#4B5563', fontWeight: 'bold' }} 
+                            />
+                            <YAxis hide domain={[0, 'dataMax + (dataMax * 0.1)']} />
+                            <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F3F4F6' }} />
+                            
+                            <ReferenceLine 
+                              y={goiasData.Meta} 
+                              stroke="#4B5563" 
+                              strokeDasharray="5 5" 
+                              label={{ position: 'top', value: `Meta: ${formatValue(goiasData.Meta, rule.format)}`, fill: '#4B5563', fontSize: 12, fontWeight: 'bold' }} 
+                            />
+                            
+                            <Bar dataKey="Realizado" radius={[6, 6, 0, 0]} maxBarSize={50}>
+                              {ranking.map((entry, index) => (
+                                <Cell 
+                                  key={`cell-${index}`} 
+                                  fill={entry.DR === 'GO' ? (targetAchieved ? colors.success : colors.warning) : colors.cardBg} 
+                                />
+                              ))}
+                              <LabelList 
+                                dataKey="Realizado" 
+                                position="top" 
+                                formatter={(val) => formatValue(val, rule.format).replace('R$', '').replace('%', '')}
+                                style={{ fill: '#4B5563', fontSize: '11px', fontWeight: 'bold' }}
+                              />
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+
+                    {/* SECÇÃO DE INSIGHTS */}
+                    <div className="flex flex-col gap-4">
+                      <div className="rounded-3xl p-6 shadow-xl flex-1 flex flex-col bg-gray-800">
+                        <h3 className="text-xl font-bold mb-6 flex items-center gap-2 pb-4 text-white border-b border-gray-700">
+                          <span className="text-cyan-500"><TrendingUp size={24} /></span>
+                          Insights Estratégicos DR-GO
+                        </h3>
+                        
+                        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                          {insights.points.length > 0 && (
+                            <div className="mb-6">
+                              <h4 className="font-bold uppercase text-xs tracking-widest mb-3 flex items-center gap-2 text-emerald-400">
+                                <CheckCircle size={16} /> Pontos Positivos
+                              </h4>
+                              <ul className="flex flex-col gap-3">
+                                {insights.points.map((point, i) => (
+                                  <li key={i} className="text-sm leading-relaxed p-3 rounded-lg text-gray-300 bg-gray-700/50 border-l-4 border-emerald-500">
+                                    {point}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {insights.attention.length > 0 && (
+                            <div>
+                              <h4 className="font-bold uppercase text-xs tracking-widest mb-3 flex items-center gap-2 text-red-400">
+                                <AlertCircle size={16} /> Pontos de Atenção
+                              </h4>
+                              <ul className="flex flex-col gap-3">
+                                {insights.attention.map((att, i) => (
+                                  <li key={i} className="text-sm leading-relaxed p-3 rounded-lg text-gray-300 bg-red-900/20 border-l-4 border-red-500">
+                                    {att}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center justify-center h-64 rounded-2xl mt-8 bg-gray-50 border-2 border-dashed border-gray-300">
+                  <p className="font-medium text-gray-500">Selecione um filtro ou indicador válido acima.</p>
+                </div>
+              )}
+
+              {/* RODAPÉ */}
+              <footer className="mt-12 text-center text-xs font-medium pb-4 pt-6 text-gray-400 border-t border-gray-100">
+                Relatório Gerencial • Baseado nas métricas PEG Janeiro a Maio de 2026 • Inteligência de Dados
+              </footer>
+            </div>
+          );
+        }
+
+        // Renderização do React na div #root
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
