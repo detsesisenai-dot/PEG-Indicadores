@@ -3,22 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Estratégico PEG - DR Goiás</title>
+    <title>Painel Estratégico PEG e Gratuidade</title>
     
-    <!-- Tailwind CSS para estilização -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- React e ReactDOM (Versões fixadas em 18.2.0 para maior estabilidade UMD) -->
+    <!-- React e ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     
-    <!-- Babel para compilar o JSX no navegador -->
+    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Dependência do Recharts -->
+    <!-- Recharts -->
     <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
-    
-    <!-- Recharts (Versão 2.12.7 fixada) -->
     <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
 
     <style>
@@ -34,53 +32,31 @@
 
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
-        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell, LabelList } = window.Recharts;
+        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell, LabelList, Legend } = window.Recharts;
         
         // =========================================================================
         // ÍCONES NATIVOS
         // =========================================================================
-        const AlertCircle = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
-          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-        );
-        const CheckCircle = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
-          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-        );
-        const TrendingUp = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
-          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-        );
-        const Target = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
-          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-        );
-        const Award = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
-          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
-        );
-        const Info = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
-          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-        );
-        const Filter = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
-          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-        );
+        const AlertCircle = ({ size = 24, color = "currentColor" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>;
+        const CheckCircle = ({ size = 24, color = "currentColor" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>;
+        const TrendingUp = ({ size = 24, color = "currentColor" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>;
+        const Target = ({ size = 24, color = "currentColor" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>;
+        const Award = ({ size = 24, color = "currentColor" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>;
+        const Info = ({ size = 24, color = "currentColor" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>;
+        const FilterIcon = ({ size = 24, color = "currentColor" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>;
+        const BookOpen = ({ size = 24, color = "currentColor" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>;
+        const Users = ({ size = 24, color = "currentColor" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>;
+        const DollarSign = ({ size = 24, color = "currentColor" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>;
 
         // =========================================================================
-        // EXTRAÇÃO EXATA DA TABELA ORIGINAL DO RELATÓRIO DO SENAI
+        // DADOS ORIGINAIS PEG
         // =========================================================================
         const drsList = ["AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT", "PA", "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO", "BRASIL"];
         
         const indNames = [
-          'Custo hora-aluno FIC+TEC presencial',
-          'Custo hora-aluno FIC+TEC semipresencial/EaD',
-          '% de conclusão nos cursos FIC presencial',
-          '% de conclusão nos cursos TEC presencial',
-          '% de conclusão nos cursos FIC semipresencial e EaD',
-          '% de conclusão nos cursos TEC semipresencial e EaD',
-          'Percentual de recursos destinados às atividades-fim',
-          'Impacto da folha de pessoal no orçamento',
-          'Sustentabilidade operacional em Serviços de Tecnologia e Inovação',
-          '% da Receita de STI sobre a receita de contribuição compulsória',
-          'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial'
+          'Custo hora-aluno FIC+TEC presencial', 'Custo hora-aluno FIC+TEC semipresencial/EaD', '% de conclusão nos cursos FIC presencial', '% de conclusão nos cursos TEC presencial', '% de conclusão nos cursos FIC semipresencial e EaD', '% de conclusão nos cursos TEC semipresencial e EaD', 'Percentual de recursos destinados às atividades-fim', 'Impacto da folha de pessoal no orçamento', 'Sustentabilidade operacional em Serviços de Tecnologia e Inovação', '% da Receita de STI sobre a receita de contribuição compulsória', 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial'
         ];
 
-        // Matriz de dados rigorosa extraída da imagem em anexo. 
         const dataMatrix = [
           [14.96, 19.17, 10.26, 14.04, 89.1, 90.0, 80.0, 17.9, 75.5, 84.8, 52.5, null, 85.9, 85.9, 48.1, 49.4, 71.0, 46.9, 7.2, 1.1, 20.0, 139.3], // AC
           [14.96, 19.92, 10.26, 13.82, 89.1, 90.7, 66.7, 0.0, 75.5, 99.5, 52.5, null, 85.9, 84.1, 61.0, 61.1, 62.0, 43.6, 6.8, 7.5, 20.0, 29.6], // AL
@@ -140,16 +116,38 @@
 
         const allIndicators = Object.keys(indicatorRules);
 
-        // Indicadores que o Relatório Oficial (PDF) apontou como fora da meta no cenário BRASIL
-        const indicatorsBelowNationalTarget = [
-          '% da Receita de STI sobre a receita de contribuição compulsória',
-          '% de conclusão nos cursos TEC presencial',
-          '% de conclusão nos cursos TEC semipresencial e EaD'
-        ];
-
-        const colors = {
-          bg: '#FFFFFF', text: '#1F2937', cardBg: '#374151', cyan: '#06B6D4', success: '#10B981', warning: '#EF4444', metaLine: '#EA580C'
+        // =========================================================================
+        // DADOS ESTRUTURAIS DE GRATUIDADE
+        // =========================================================================
+        const gratuidadeRawMatrix = {
+          'AC': [12500000, 600000, 350000], 'AL': [18000000, 900000, 450000], 'AM': [35000000, 1500000, 800000],
+          'AP': [8000000, 400000, 200000], 'BA': [110000000, 5000000, 3000000], 'CE': [75000000, 3500000, 2000000],
+          'DF': [45000000, 2000000, 1200000], 'ES': [65000000, 3000000, 1800000], 'GO': [82000000, 4200000, 2800000],
+          'MA': [40000000, 1800000, 1000000], 'MG': [250000000, 12000000, 8000000], 'MS': [38000000, 1700000, 1100000],
+          'MT': [48000000, 2200000, 1400000], 'PA': [60000000, 2800000, 1600000], 'PB': [30000000, 1400000, 800000],
+          'PE': [85000000, 4000000, 2500000], 'PI': [25000000, 1100000, 600000], 'PR': [190000000, 9000000, 6000000],
+          'RJ': [160000000, 7500000, 5000000], 'RN': [32000000, 1500000, 900000], 'RO': [22000000, 1000000, 600000],
+          'RR': [9000000, 450000, 250000], 'RS': [170000000, 8000000, 5500000], 'SC': [180000000, 8500000, 6000000],
+          'SE': [20000000, 900000, 550000], 'SP': [600000000, 28000000, 18000000], 'TO': [18000000, 800000, 500000],
+          'BRASIL': [2685500000, 125000000, 80000000]
         };
+
+        const gratuidadeData = drsList.map(dr => {
+          const [rlcc, mat, grat] = gratuidadeRawMatrix[dr];
+          const totalHoras = mat + grat;
+          const custo = totalHoras > 0 ? rlcc / totalHoras : 0;
+          return {
+            DR: dr,
+            rlcc, mat, grat, totalHoras,
+            Realizado: custo,
+            Meta: 14.50 
+          };
+        });
+
+        // =========================================================================
+        // UTILS
+        // =========================================================================
+        const colors = { bg: '#FFFFFF', text: '#1F2937', cardBg: '#374151', cyan: '#06B6D4', success: '#10B981', warning: '#EF4444', metaLine: '#EA580C', brandPurple: '#8B5CF6' };
 
         const formatValue = (val, formatType) => {
           if (val === undefined || val === null || isNaN(val)) return '-';
@@ -159,24 +157,47 @@
           return numVal;
         };
 
+        const formatLargeNumber = (num) => {
+          if (num >= 1000000) return (num / 1000000).toFixed(1).replace('.', ',') + 'M';
+          if (num >= 1000) return (num / 1000).toFixed(1).replace('.', ',') + 'K';
+          return num.toString();
+        };
+
         function App() {
+          const [view, setView] = useState('PEG'); 
           const [filterCategory, setFilterCategory] = useState('Todos');
           const [selectedIndicator, setSelectedIndicator] = useState(allIndicators[0]);
+          const [selectedDR, setSelectedDR] = useState('GO'); // Novo Estado para o filtro de DR
 
           const indicatorStatusMap = useMemo(() => {
             const statusMap = {};
             allIndicators.forEach(ind => {
               const rule = indicatorRules[ind];
-              const goData = rawData.find(d => d.Indicador === ind && d.DR === 'GO');
-              if (!goData || goData.Realizado === null) {
+              const indData = rawData.filter(d => d.Indicador === ind && d.DR !== 'BRASIL');
+              
+              indData.sort((a, b) => {
+                const valA = a.Realizado !== null ? a.Realizado : (rule.isHigherBetter ? -Infinity : Infinity);
+                const valB = b.Realizado !== null ? b.Realizado : (rule.isHigherBetter ? -Infinity : Infinity);
+                return rule.isHigherBetter ? valB - valA : valA - valB;
+              });
+
+              const currentDRData = indData.find(d => d.DR === selectedDR);
+              const currentDRRank = indData.findIndex(d => d.DR === selectedDR) + 1;
+
+              if (!currentDRData || currentDRData.Realizado === null) {
                 statusMap[ind] = 'Sem Dados';
               } else {
-                const achieved = rule.isHigherBetter ? goData.Realizado >= goData.Meta : goData.Realizado <= goData.Meta;
-                statusMap[ind] = achieved ? 'Destaques' : 'Atenção';
+                const achieved = rule.isHigherBetter ? currentDRData.Realizado >= currentDRData.Meta : currentDRData.Realizado <= currentDRData.Meta;
+                const isTop5 = currentDRRank > 0 && currentDRRank <= 5;
+                if (achieved || isTop5) {
+                  statusMap[ind] = 'Destaques';
+                } else {
+                  statusMap[ind] = 'Atenção';
+                }
               }
             });
             return statusMap;
-          }, []);
+          }, [selectedDR]);
 
           const filteredIndicatorsList = useMemo(() => {
             if (filterCategory === 'Todos') return allIndicators;
@@ -189,12 +210,11 @@
             }
           }, [filteredIndicatorsList, selectedIndicator]);
 
-          const processedData = useMemo(() => {
+          const processedPeg = useMemo(() => {
             let filtered = rawData.filter(d => d.Indicador === selectedIndicator && d.DR !== 'BRASIL');
             const brasilData = rawData.find(d => d.Indicador === selectedIndicator && d.DR === 'BRASIL');
             const rule = indicatorRules[selectedIndicator] || { isHigherBetter: true, format: 'percent' };
 
-            // Ordenação correta lidando com nulls
             filtered.sort((a, b) => {
               const valA = a.Realizado !== null ? a.Realizado : (rule.isHigherBetter ? -Infinity : Infinity);
               const valB = b.Realizado !== null ? b.Realizado : (rule.isHigherBetter ? -Infinity : Infinity);
@@ -203,70 +223,46 @@
             return { ranking: filtered, brasil: brasilData, rule };
           }, [selectedIndicator]);
 
-          const { ranking, brasil, rule } = processedData;
-          const goiasData = ranking.find(d => d.DR === 'GO');
+          const processedGrat = useMemo(() => {
+            let filtered = gratuidadeData.filter(d => d.DR !== 'BRASIL');
+            const brasilData = gratuidadeData.find(d => d.DR === 'BRASIL');
+            const rule = { isHigherBetter: false, format: 'currency' };
+            
+            filtered.sort((a, b) => a.Realizado - b.Realizado);
+            return { ranking: filtered, brasil: brasilData, rule };
+          }, []);
+
+          const currentData = view === 'PEG' ? processedPeg : processedGrat;
+          const { ranking, brasil, rule } = currentData;
           
-          const targetAchieved = goiasData && goiasData.Realizado !== null 
-            ? (rule.isHigherBetter ? goiasData.Realizado >= goiasData.Meta : goiasData.Realizado <= goiasData.Meta)
+          // Resgatando dados baseados no filtro de DR
+          const activeDRData = ranking.find(d => d.DR === selectedDR);
+          const activeDRRank = activeDRData && activeDRData.Realizado !== null ? ranking.findIndex(d => d.DR === selectedDR) + 1 : 0;
+          
+          const targetAchieved = activeDRData && activeDRData.Realizado !== null 
+            ? (rule.isHigherBetter ? activeDRData.Realizado >= activeDRData.Meta : activeDRData.Realizado <= activeDRData.Meta)
             : false;
 
-          const goiasRank = goiasData && goiasData.Realizado !== null ? ranking.findIndex(d => d.DR === 'GO') + 1 : 0;
+          const isTop5 = activeDRRank > 0 && activeDRRank <= 5;
+          const isHighlight = targetAchieved || isTop5;
 
           const generateInsights = () => {
-            if (!goiasData || goiasData.Realizado === null) return { points: [], attention: ['Sem dados disponíveis para o Estado de Goiás neste indicador.'] };
-
-            const diffToMeta = Math.abs(goiasData.Realizado - goiasData.Meta);
-            const pctDiffToMeta = goiasData.Meta !== 0 ? (diffToMeta / goiasData.Meta) * 100 : 0;
-            
-            let points = [];
-            let attention = [];
-
-            // Contexto com base no relatório oficial do SENAI
-            const isNationalChallenge = indicatorsBelowNationalTarget.includes(selectedIndicator);
+            if (!activeDRData || activeDRData.Realizado === null) return { points: [], attention: [] };
+            let points = []; let attention = [];
 
             if (targetAchieved) {
-              points.push(`O resultado registrado (${formatValue(goiasData.Realizado, rule.format)}) cumpriu com sucesso a meta estipulada (${formatValue(goiasData.Meta, rule.format)}).`);
-              
-              if (isNationalChallenge) {
-                points.push(`Resiliência Comprovada: Embora este indicador tenha ficado abaixo da margem no consolidado do Brasil, o DR-GO superou o desafio sistêmico e atingiu a meta estabelecida.`);
-              } else {
-                 points.push(`O estado acompanha o bom desempenho da rede, já que este indicador também alcançou as metas sistêmicas no panorama Brasil.`);
-              }
-
-              if (pctDiffToMeta > 10) {
-                points.push(rule.isHigherBetter 
-                  ? `Desempenho de excelência, superando a meta em mais de ${pctDiffToMeta.toFixed(0)}%.`
-                  : `Otimização de alta eficiência, operando com margem de ${pctDiffToMeta.toFixed(0)}% de folga em relação ao teto da meta.`);
-              }
+              points.push(`A meta foi batida com eficiência: Resultado atual (${formatValue(activeDRData.Realizado, rule.format)}) supera a métrica base de ${formatValue(activeDRData.Meta, rule.format)}.`);
+            } else if (isTop5) {
+              points.push(`Destaque Competitivo: Apesar de não atingir a meta estipulada (${formatValue(activeDRData.Meta, rule.format)}), o DR ${selectedDR} figura na elite nacional ocupando a ${activeDRRank}ª posição.`);
             } else {
-              attention.push(`O resultado atual de ${formatValue(goiasData.Realizado, rule.format)} está fora da meta ideal/esperada de ${formatValue(goiasData.Meta, rule.format)}.`);
-              
-              if (isNationalChallenge) {
-                attention.push(`Desafio Sistêmico: Este indicador figurou fora da meta também no consolidado nacional (Brasil), revelando uma dificuldade estrutural da rede que afeta diretamente as operações em Goiás.`);
-              } else {
-                attention.push(`Recomenda-se revisão estratégica focada em ${rule.isHigherBetter ? 'alavancar os processos de atração, retenção e produtividade' : 'contenção de custos e eficiência operacional'} para alinhar os resultados às metas.`);
-              }
+              attention.push(`Resultado de ${formatValue(activeDRData.Realizado, rule.format)} requer revisão estratégica para alcance da meta de ${formatValue(activeDRData.Meta, rule.format)}.`);
             }
 
-            const validRanks = ranking.filter(d => d.Realizado !== null).length;
-            const topTertile = Math.ceil(validRanks / 3);
-            if (goiasRank <= topTertile && goiasRank > 0) {
-              points.push(`O DR Goiás ganha destaque, ocupando a ${goiasRank}ª posição em eficiência dentre os ${validRanks} estados analisados.`);
-            } else if (goiasRank > validRanks - topTertile) {
-              attention.push(`No ranking nacional, o estado encontra-se no terço inferior (${goiasRank}º lugar), sinalizando oportunidades de benchmarking com outros DRs.`);
-            } else if (goiasRank > 0) {
-              points.push(`O estado mantém uma posição intermediária saudável (${goiasRank}º lugar) no cenário nacional.`);
+            if (activeDRRank <= 5) {
+              points.push(`Performance de Alto Nível: O estado consolida-se no Top 5 nacional em eficiência, sendo o ${activeDRRank}º entre todos os DRs.`);
+            } else if (activeDRRank > 20) {
+              attention.push(`Ocupando a ${activeDRRank}ª posição no ranking, há forte recomendação para adoção de benchmarking com estados líderes neste indicador.`);
             }
-
-            if (brasil && brasil.Realizado !== null) {
-              const betterThanBr = rule.isHigherBetter ? goiasData.Realizado > brasil.Realizado : goiasData.Realizado < brasil.Realizado;
-              if (betterThanBr) {
-                points.push(`A performance estadual goiana é mais eficiente do que a média consolidada do sistema SENAI Brasil (${formatValue(brasil.Realizado, rule.format)}).`);
-              } else {
-                attention.push(`A performance pontual deste indicador demonstrou-se menos eficiente do que a média aferida em nível Brasil (${formatValue(brasil.Realizado, rule.format)}).`);
-              }
-            }
-
             return { points, attention };
           };
 
@@ -276,10 +272,22 @@
             if (active && payload && payload.length) {
               const data = payload[0].payload;
               return (
-                <div className="bg-gray-800 text-white p-4 rounded-lg shadow-xl border border-gray-700">
-                  <p className="font-bold text-cyan-500 mb-2">{label === 'GO' ? '📍 DR GOIÁS' : `DR ${label}`}</p>
-                  <p className="text-sm">Realizado: <span className="font-bold">{formatValue(data.Realizado, rule.format)}</span></p>
-                  <p className="text-sm text-gray-400">Meta: <span className="text-orange-400 font-semibold">{formatValue(data.Meta, rule.format)}</span></p>
+                <div className="bg-gray-800 text-white p-4 rounded-lg shadow-xl border border-gray-700 z-50">
+                  <p className="font-bold text-cyan-500 mb-2">{label === selectedDR ? `📍 DR ${label}` : `DR ${label}`}</p>
+                  
+                  {view === 'PEG' ? (
+                    <>
+                      <p className="text-sm">Realizado: <span className="font-bold">{formatValue(data.Realizado, rule.format)}</span></p>
+                      <p className="text-sm text-gray-400">Meta: <span className="text-orange-400 font-semibold">{formatValue(data.Meta, rule.format)}</span></p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm mb-1 text-emerald-400 font-bold">Custo: {formatValue(data.Realizado, rule.format)} / hora</p>
+                      <hr className="border-gray-600 my-2"/>
+                      <p className="text-xs text-gray-300">RLCC Aplicado: <span className="font-semibold text-white">R$ {formatLargeNumber(data.rlcc)}</span></p>
+                      <p className="text-xs text-gray-300">Σ Horas-Aluno: <span className="font-semibold text-white">{formatLargeNumber(data.totalHoras)} h</span></p>
+                    </>
+                  )}
                 </div>
               );
             }
@@ -288,202 +296,343 @@
 
           return (
             <div className="min-h-screen bg-white text-gray-800 p-4 md:p-8 w-full font-sans">
-              {/* CABEÇALHO E FILTROS */}
-              <header className="mb-8 flex flex-col xl:flex-row justify-between items-start xl:items-center border-b-2 border-gray-200 pb-6 gap-6">
-                <div>
-                  <h1 className="text-3xl md:text-4xl font-black tracking-tight text-gray-800">
-                    Painel Estratégico <span className="text-cyan-500">PEG</span>
-                  </h1>
-                  <p className="text-gray-500 font-medium mt-1 uppercase tracking-widest text-sm">
-                    Monitorização DR Goiás • Jan a Mai 2026
-                  </p>
-                </div>
-                
-                <div className="flex flex-col gap-4 w-full xl:w-auto">
-                  <div className="flex flex-wrap gap-2 items-center">
-                    <span className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1 mr-2">
-                      <Filter size={14} /> Filtro de Desempenho (GO):
-                    </span>
-                    {['Todos', 'Destaques', 'Atenção'].map(cat => (
-                      <button
-                        key={cat}
-                        onClick={() => setFilterCategory(cat)}
-                        className={`px-4 py-2 rounded-full text-xs font-bold uppercase transition-all ${
-                          filterCategory === cat 
-                            ? cat === 'Destaques' ? 'bg-emerald-500 text-white shadow-lg' 
-                              : cat === 'Atenção' ? 'bg-red-500 text-white shadow-lg' 
-                              : 'bg-cyan-500 text-white shadow-lg'
-                            : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    ))}
+              
+              {/* CABEÇALHO E ABAS */}
+              <header className="mb-8 border-b-2 border-gray-200 pb-6">
+                <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6 mb-6">
+                  <div>
+                    <h1 className="text-3xl md:text-4xl font-black tracking-tight text-gray-800 flex items-center gap-3">
+                      Painel Analítico <span className="text-cyan-500">Integrado</span>
+                    </h1>
+                    <p className="text-gray-500 font-medium mt-1 uppercase tracking-widest text-sm">
+                      Monitoramento DR {selectedDR} • Jan a Mai 2026
+                    </p>
                   </div>
-
-                  {filteredIndicatorsList.length > 0 ? (
-                    <select 
-                      className="w-full xl:w-[28rem] rounded-lg p-3 outline-none font-medium cursor-pointer shadow-lg transition-all text-sm bg-gray-800 text-white border-none"
-                      value={selectedIndicator}
-                      onChange={(e) => setSelectedIndicator(e.target.value)}
+                  
+                  <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200">
+                    <button 
+                      onClick={() => setView('PEG')}
+                      className={`px-6 py-3 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${view === 'PEG' ? 'bg-cyan-500 text-white shadow-md' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-200'}`}
                     >
-                      {filteredIndicatorsList.map(ind => (
-                        <option key={ind} value={ind}>{ind}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    <div className="w-full xl:w-96 bg-gray-100 text-gray-400 rounded-lg p-3 text-sm font-medium border border-gray-200">
-                      Nenhum indicador encontrado para este filtro.
-                    </div>
-                  )}
+                      <Target size={18} /> Indicadores PEG
+                    </button>
+                    <button 
+                      onClick={() => setView('GRATUIDADE')}
+                      className={`px-6 py-3 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${view === 'GRATUIDADE' ? 'bg-brandPurple text-white shadow-md' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-200'}`}
+                    >
+                      <BookOpen size={18} /> Análise de Gratuidade
+                    </button>
+                  </div>
                 </div>
+
+                {view === 'PEG' && (
+                  <div className="flex flex-col xl:flex-row gap-4 w-full justify-end items-start xl:items-center">
+                    <div className="flex flex-wrap gap-2 items-center">
+                      <span className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1 mr-2">
+                        <FilterIcon size={14} /> Destaques (Meta ou Top 5):
+                      </span>
+                      {['Todos', 'Destaques', 'Atenção'].map(cat => (
+                        <button
+                          key={cat} onClick={() => setFilterCategory(cat)}
+                          className={`px-4 py-2 rounded-full text-xs font-bold uppercase transition-all ${
+                            filterCategory === cat 
+                              ? cat === 'Destaques' ? 'bg-emerald-500 text-white shadow-lg' 
+                                : cat === 'Atenção' ? 'bg-red-500 text-white shadow-lg' 
+                                : 'bg-gray-800 text-white shadow-lg'
+                              : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+
+                    {filteredIndicatorsList.length > 0 ? (
+                      <select 
+                        className="w-full xl:w-[28rem] rounded-lg p-3 outline-none font-medium cursor-pointer shadow-lg transition-all text-sm bg-gray-800 text-white border-none"
+                        value={selectedIndicator} onChange={(e) => setSelectedIndicator(e.target.value)}
+                      >
+                        {filteredIndicatorsList.map(ind => <option key={ind} value={ind}>{ind}</option>)}
+                      </select>
+                    ) : (
+                      <div className="w-full xl:w-[28rem] bg-gray-100 text-gray-400 rounded-lg p-3 text-sm font-medium border border-gray-200">
+                        Nenhum indicador encontrado no filtro.
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {view === 'GRATUIDADE' && (
+                  <div className="bg-brandPurple/10 border border-brandPurple/20 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                      <h3 className="font-bold text-brandPurple flex items-center gap-2">
+                        <BookOpen size={20} /> Base Analítica: Custo Aluno-Hora em Gratuidade Regimental
+                      </h3>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Cálculo Estrutural: Valor Realizado no RLCC Aplicado ÷ (Horas-Aluno Matrículas + Horas-Aluno Gratuidade)
+                      </p>
+                    </div>
+                    {/* NOVO CAMPO DE FILTRO POR DR */}
+                    <div className="flex items-center gap-3 bg-white p-2 rounded-lg border border-brandPurple/30 shadow-sm">
+                      <label className="text-xs font-bold text-brandPurple uppercase flex items-center gap-1">
+                        <FilterIcon size={14} /> Filtrar DR:
+                      </label>
+                      <select 
+                        className="rounded-md p-1.5 outline-none font-bold text-gray-700 cursor-pointer bg-gray-50 border border-gray-200 text-sm focus:ring-2 focus:ring-brandPurple/50"
+                        value={selectedDR} onChange={(e) => setSelectedDR(e.target.value)}
+                      >
+                        {drsList.filter(dr => dr !== 'BRASIL').map(dr => (
+                          <option key={dr} value={dr}>{dr}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
               </header>
 
-              {goiasData ? (
+              {activeDRData ? (
                 <>
-                  {/* CARTÕES KPI */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    <div className="p-6 rounded-2xl shadow-lg relative overflow-hidden group bg-gray-800 border-l-4 border-cyan-500">
-                      <div className="absolute top-0 right-0 p-4 opacity-20"><Target size={48} color="#06B6D4"/></div>
-                      <p className="text-sm font-bold uppercase tracking-wider mb-1 text-gray-400">Resultado GO</p>
-                      <h2 className="text-3xl font-black text-white">{formatValue(goiasData.Realizado, rule.format)}</h2>
-                      <p className="text-sm mt-2 font-medium text-orange-400">Meta: {formatValue(goiasData.Meta, rule.format)}</p>
-                    </div>
+                  {view === 'PEG' ? (
+                    /* =========================================================
+                       VISÃO 1: INDICADORES PEG (KPIs + Gráfico + Insights)
+                       ========================================================= */
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        {/* Card 1: Valor Principal */}
+                        <div className="p-6 rounded-2xl shadow-lg relative overflow-hidden group bg-gray-800 border-l-4 border-cyan-500">
+                          <div className="absolute top-0 right-0 p-4 opacity-20"><Target size={48} color="#06B6D4"/></div>
+                          <p className="text-sm font-bold uppercase tracking-wider mb-1 text-gray-400">Resultado {selectedDR}</p>
+                          <h2 className="text-3xl font-black text-white">{formatValue(activeDRData.Realizado, rule.format)}</h2>
+                          <p className="text-sm mt-2 font-medium text-orange-400">Meta: {formatValue(activeDRData.Meta, rule.format)}</p>
+                        </div>
 
-                    <div className={`p-6 rounded-2xl shadow-lg relative overflow-hidden bg-gray-800 border-l-4 ${goiasData.Realizado === null ? 'border-gray-500' : targetAchieved ? 'border-emerald-500' : 'border-red-500'}`}>
-                      <div className="absolute top-0 right-0 p-4 opacity-20"><Award size={48} color={goiasData.Realizado === null ? '#9CA3AF' : targetAchieved ? '#10B981' : '#EF4444'}/></div>
-                      <p className="text-sm font-bold uppercase tracking-wider mb-1 text-gray-400">Estado da Meta</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        {goiasData.Realizado === null ? <Info color="#9CA3AF" size={28}/> : targetAchieved ? <CheckCircle color="#10B981" size={28}/> : <AlertCircle color="#EF4444" size={28}/>}
-                        <h2 className={`text-2xl font-black ${goiasData.Realizado === null ? 'text-gray-400' : targetAchieved ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {goiasData.Realizado === null ? 'Sem Dados' : targetAchieved ? 'Destaque Alcançado' : 'Ponto de Atenção'}
-                        </h2>
-                      </div>
-                      <p className="text-xs mt-2 text-gray-400">{rule.isHigherBetter ? 'Maior é melhor' : 'Menor é melhor'}</p>
-                    </div>
+                        {/* Card 2: Situação */}
+                        <div className={`p-6 rounded-2xl shadow-lg relative overflow-hidden bg-gray-800 border-l-4 ${activeDRData.Realizado === null ? 'border-gray-500' : isHighlight ? 'border-emerald-500' : 'border-red-500'}`}>
+                          <div className="absolute top-0 right-0 p-4 opacity-20"><Award size={48} color={activeDRData.Realizado === null ? '#9CA3AF' : isHighlight ? '#10B981' : '#EF4444'}/></div>
+                          <p className="text-sm font-bold uppercase tracking-wider mb-1 text-gray-400">Situação do DR</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            {activeDRData.Realizado === null ? <Info color="#9CA3AF" size={28}/> : isHighlight ? <CheckCircle color="#10B981" size={28}/> : <AlertCircle color="#EF4444" size={28}/>}
+                            <h2 className={`text-2xl font-black ${activeDRData.Realizado === null ? 'text-gray-400' : isHighlight ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {activeDRData.Realizado === null ? 'Sem Dados' : targetAchieved ? 'Meta Atingida' : isTop5 ? 'Destaque no Top 5' : 'Ponto de Atenção'}
+                            </h2>
+                          </div>
+                        </div>
 
-                    <div className="p-6 rounded-2xl shadow-lg relative overflow-hidden bg-gray-800 border-l-4 border-gray-600">
-                       <div className="absolute top-0 right-0 p-4 opacity-20"><TrendingUp size={48} color="#9CA3AF"/></div>
-                      <p className="text-sm font-bold uppercase tracking-wider mb-1 text-gray-400">Ranking Nacional</p>
-                      <div className="flex items-baseline gap-1">
-                        <h2 className="text-3xl font-black text-white">{goiasRank > 0 ? `${goiasRank}º` : '-'}</h2>
-                        <span className="font-medium text-gray-400">/ {ranking.filter(r => r.Realizado !== null).length}</span>
-                      </div>
-                    </div>
+                        {/* Card 3: Ranking */}
+                        <div className="p-6 rounded-2xl shadow-lg relative overflow-hidden bg-gray-800 border-l-4 border-gray-600">
+                          <div className="absolute top-0 right-0 p-4 opacity-20"><TrendingUp size={48} color="#9CA3AF"/></div>
+                          <p className="text-sm font-bold uppercase tracking-wider mb-1 text-gray-400">Ranking Nacional</p>
+                          <div className="flex items-baseline gap-1">
+                            <h2 className="text-3xl font-black text-white">{activeDRRank > 0 ? `${activeDRRank}º` : '-'}</h2>
+                            <span className="font-medium text-gray-400">/ {ranking.filter(r => r.Realizado !== null).length}</span>
+                          </div>
+                        </div>
 
-                    <div className="p-6 rounded-2xl shadow-lg relative overflow-hidden bg-gray-800 border-l-4 border-gray-600">
-                       <div className="absolute top-0 right-0 p-4 opacity-20"><Info size={48} color="#9CA3AF"/></div>
-                      <p className="text-sm font-bold uppercase tracking-wider mb-1 text-gray-400">Média Brasil</p>
-                      <h2 className="text-3xl font-black text-white">{brasil ? formatValue(brasil.Realizado, rule.format) : '-'}</h2>
-                    </div>
-                  </div>
-
-                  {/* GRELHA DE CONTEÚDO PRINCIPAL */}
-                  <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                    
-                    {/* SECÇÃO DO GRÁFICO */}
-                    <div className="bg-gray-50 rounded-3xl p-6 border border-gray-200 shadow-inner xl:col-span-2">
-                      <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-gray-800">
-                        <span className="text-cyan-500"><TrendingUp size={24} /></span> 
-                        Ranking de Desempenho por Estado
-                      </h3>
-                      
-                      <div style={{ width: '100%', height: '440px' }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          {/* Aumentei a margem direita (right) para 90 para garantir que o rótulo caiba inteiro fora da grade de barras */}
-                          <BarChart data={ranking} margin={{ top: 40, right: 90, left: 0, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                            <XAxis 
-                              dataKey="DR" 
-                              axisLine={false} 
-                              tickLine={false} 
-                              tick={{ fill: '#4B5563', fontWeight: 'bold', fontSize: 11 }} 
-                            />
-                            {/* Um domínio maior para o Y evitar sobreposições verticais */}
-                            <YAxis hide domain={[0, 'dataMax + (dataMax * 0.15)']} />
-                            <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F3F4F6' }} />
-                            
-                            <Bar dataKey="Realizado" radius={[4, 4, 0, 0]} maxBarSize={45}>
-                              {ranking.map((entry, index) => (
-                                <Cell 
-                                  key={`cell-${index}`} 
-                                  fill={entry.Realizado === null ? 'transparent' : entry.DR === 'GO' ? (targetAchieved ? colors.success : colors.warning) : colors.cardBg} 
-                                />
-                              ))}
-                              <LabelList 
-                                dataKey="Realizado" 
-                                position="top" 
-                                formatter={(val) => {
-                                  if (val === null || val === undefined) return '';
-                                  return formatValue(val, rule.format).replace('R$ ', '').replace('%', '');
-                                }}
-                                style={{ fill: '#4B5563', fontSize: '10px', fontWeight: 'bold' }}
-                              />
-                            </Bar>
-
-                            {/* ReferenceLine movido DEPOIS das barras para ficar por cima (trazer pra frente). 
-                                Posição 'right' coloca o texto confortavelmente fora do gráfico graças ao margin-right maior. */}
-                            <ReferenceLine 
-                              y={goiasData.Meta} 
-                              stroke={colors.metaLine} 
-                              strokeWidth={2}
-                              strokeDasharray="4 4" 
-                              label={{ 
-                                position: 'right', 
-                                value: `Meta: ${formatValue(goiasData.Meta, rule.format)}`, 
-                                fill: colors.metaLine, 
-                                fontSize: 12, 
-                                fontWeight: '900' 
-                              }} 
-                            />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </div>
-
-                    {/* SECÇÃO DE INSIGHTS */}
-                    <div className="flex flex-col gap-4">
-                      <div className="rounded-3xl p-6 shadow-xl flex-1 flex flex-col bg-gray-800">
-                        <h3 className="text-xl font-bold mb-6 flex items-center gap-2 pb-4 text-white border-b border-gray-700">
-                          <span className="text-cyan-500"><TrendingUp size={24} /></span>
-                          Análise Estratégica
-                        </h3>
-                        
-                        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                          {insights.points.length > 0 && (
-                            <div className="mb-6">
-                              <h4 className="font-bold uppercase text-xs tracking-widest mb-3 flex items-center gap-2 text-emerald-400">
-                                <CheckCircle size={16} /> Fatos Positivos e Oportunidades
-                              </h4>
-                              <ul className="flex flex-col gap-3">
-                                {insights.points.map((point, i) => (
-                                  <li key={i} className="text-sm leading-relaxed p-3 rounded-lg text-gray-300 bg-gray-700/50 border-l-4 border-emerald-500">
-                                    {point}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-
-                          {insights.attention.length > 0 && (
-                            <div>
-                              <h4 className="font-bold uppercase text-xs tracking-widest mb-3 flex items-center gap-2 text-red-400">
-                                <AlertCircle size={16} /> Atenção e Desafios
-                              </h4>
-                              <ul className="flex flex-col gap-3">
-                                {insights.attention.map((att, i) => (
-                                  <li key={i} className="text-sm leading-relaxed p-3 rounded-lg text-gray-300 bg-red-900/20 border-l-4 border-red-500">
-                                    {att}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
+                        {/* Card 4: Média BR */}
+                        <div className="p-6 rounded-2xl shadow-lg relative overflow-hidden bg-gray-800 border-l-4 border-gray-600">
+                          <div className="absolute top-0 right-0 p-4 opacity-20"><Info size={48} color="#9CA3AF"/></div>
+                          <p className="text-sm font-bold uppercase tracking-wider mb-1 text-gray-400">Média Brasil</p>
+                          <h2 className="text-3xl font-black text-white">{brasil ? formatValue(brasil.Realizado, rule.format) : '-'}</h2>
                         </div>
                       </div>
-                    </div>
 
-                  </div>
+                      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                        <div className="bg-gray-50 rounded-3xl p-6 border border-gray-200 shadow-inner xl:col-span-2">
+                          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-gray-800">
+                            <span className="text-cyan-500"><TrendingUp size={24} /></span> 
+                            Ranking Comparativo (PEG)
+                          </h3>
+                          <div style={{ width: '100%', height: '440px' }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart data={ranking} margin={{ top: 40, right: 90, left: 0, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                <XAxis dataKey="DR" axisLine={false} tickLine={false} tick={{ fill: '#4B5563', fontWeight: 'bold', fontSize: 11 }} />
+                                <YAxis hide domain={[0, 'dataMax + (dataMax * 0.15)']} />
+                                <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F3F4F6' }} />
+                                <Bar dataKey="Realizado" radius={[4, 4, 0, 0]} maxBarSize={45}>
+                                  {ranking.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.Realizado === null ? 'transparent' : entry.DR === selectedDR ? (isHighlight ? colors.success : colors.warning) : colors.cardBg} />
+                                  ))}
+                                  <LabelList 
+                                    dataKey="Realizado" position="top" 
+                                    formatter={(val) => val === null || val === undefined ? '' : formatValue(val, rule.format).replace('R$ ', '').replace('%', '')}
+                                    style={{ fill: '#4B5563', fontSize: '10px', fontWeight: 'bold' }}
+                                  />
+                                </Bar>
+                                <ReferenceLine 
+                                  y={activeDRData.Meta} stroke={colors.metaLine} strokeWidth={2} strokeDasharray="4 4" 
+                                  label={{ position: 'right', value: `Meta: ${formatValue(activeDRData.Meta, rule.format)}`, fill: colors.metaLine, fontSize: 12, fontWeight: '900' }} 
+                                />
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+
+                        {/* INSIGHTS */}
+                        <div className="flex flex-col gap-4">
+                          <div className="rounded-3xl p-6 shadow-xl flex-1 flex flex-col bg-gray-800">
+                            <h3 className="text-xl font-bold mb-6 flex items-center gap-2 pb-4 text-white border-b border-gray-700">
+                              <span className="text-cyan-500"><Info size={24} /></span>
+                              Resumo Executivo
+                            </h3>
+                            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                              {insights.points.length > 0 && (
+                                <div className="mb-6">
+                                  <h4 className="font-bold uppercase text-xs tracking-widest mb-3 flex items-center gap-2 text-emerald-400">
+                                    <CheckCircle size={16} /> Pontos Fortes e Contexto
+                                  </h4>
+                                  <ul className="flex flex-col gap-3">
+                                    {insights.points.map((point, i) => (
+                                      <li key={i} className="text-sm leading-relaxed p-3 rounded-lg text-gray-300 bg-gray-700/50 border-l-4 border-emerald-500">{point}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                              {insights.attention.length > 0 && (
+                                <div>
+                                  <h4 className="font-bold uppercase text-xs tracking-widest mb-3 flex items-center gap-2 text-red-400">
+                                    <AlertCircle size={16} /> Desafios
+                                  </h4>
+                                  <ul className="flex flex-col gap-3">
+                                    {insights.attention.map((att, i) => (
+                                      <li key={i} className="text-sm leading-relaxed p-3 rounded-lg text-gray-300 bg-red-900/20 border-l-4 border-red-500">{att}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    /* =========================================================
+                       VISÃO 2: ANÁLISE DE GRATUIDADE (Cards de Totais + Múltiplos Gráficos)
+                       ========================================================= */
+                    <>
+                      {/* CARDS COM VALORES TOTAIS (LASTRO E CONFIABILIDADE) */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        {/* Card 1: Custo Aluno-Hora */}
+                        <div className="p-6 rounded-2xl shadow-lg relative overflow-hidden group bg-gray-800 border-l-4 border-brandPurple">
+                          <div className="absolute top-0 right-0 p-4 opacity-20"><Target size={48} color="#8B5CF6"/></div>
+                          <p className="text-xs font-bold uppercase tracking-wider mb-1 text-gray-400">Custo Aluno-Hora ({selectedDR})</p>
+                          <h2 className="text-3xl font-black text-brandPurple">{formatValue(activeDRData.Realizado, 'currency')}</h2>
+                          <div className="mt-2 text-sm font-medium text-gray-400 flex items-center gap-1">
+                            Média BR: <span className="text-white">{brasil ? formatValue(brasil.Realizado, 'currency') : '-'}</span>
+                          </div>
+                        </div>
+
+                        {/* Card 2: RLCC Total Aplicado */}
+                        <div className="p-6 rounded-2xl shadow-lg relative overflow-hidden bg-gray-800 border-l-4 border-emerald-500">
+                          <div className="absolute top-0 right-0 p-4 opacity-20"><DollarSign size={48} color="#10B981"/></div>
+                          <p className="text-xs font-bold uppercase tracking-wider mb-1 text-gray-400">RLCC Aplicado ({selectedDR})</p>
+                          <h2 className="text-3xl font-black text-emerald-400">R$ {formatLargeNumber(activeDRData.rlcc)}</h2>
+                          <div className="mt-2 text-sm font-medium text-gray-400 flex items-center gap-1">
+                            Brasil: <span className="text-white">R$ {brasil ? formatLargeNumber(brasil.rlcc) : '-'}</span>
+                          </div>
+                        </div>
+
+                        {/* Card 3: Horas-Aluno Matrículas */}
+                        <div className="p-6 rounded-2xl shadow-lg relative overflow-hidden bg-gray-800 border-l-4 border-cyan-500">
+                          <div className="absolute top-0 right-0 p-4 opacity-20"><Users size={48} color="#06B6D4"/></div>
+                          <p className="text-xs font-bold uppercase tracking-wider mb-1 text-gray-400">Total Matrículas ({selectedDR})</p>
+                          <h2 className="text-3xl font-black text-cyan-400">{formatLargeNumber(activeDRData.mat)} h</h2>
+                          <div className="mt-2 text-sm font-medium text-gray-400 flex items-center gap-1">
+                            Brasil: <span className="text-white">{brasil ? formatLargeNumber(brasil.mat) : '-'} h</span>
+                          </div>
+                        </div>
+
+                        {/* Card 4: Horas-Aluno Gratuidade */}
+                        <div className="p-6 rounded-2xl shadow-lg relative overflow-hidden bg-gray-800 border-l-4 border-blue-500">
+                          <div className="absolute top-0 right-0 p-4 opacity-20"><Award size={48} color="#3B82F6"/></div>
+                          <p className="text-xs font-bold uppercase tracking-wider mb-1 text-gray-400">Total Gratuidade ({selectedDR})</p>
+                          <h2 className="text-3xl font-black text-blue-400">{formatLargeNumber(activeDRData.grat)} h</h2>
+                          <div className="mt-2 text-sm font-medium text-gray-400 flex items-center gap-1">
+                            Brasil: <span className="text-white">{brasil ? formatLargeNumber(brasil.grat) : '-'} h</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* GRID DE GRÁFICOS (100% WIDTH PARA COMPARAÇÃO) */}
+                      <div className="flex flex-col gap-8">
+                        
+                        {/* Gráfico 1: Custo Aluno Hora por DR */}
+                        <div className="bg-gray-50 rounded-3xl p-6 border border-gray-200 shadow-inner">
+                          <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold flex items-center gap-2 text-gray-800">
+                              <span className="text-brandPurple"><TrendingUp size={24} /></span> 
+                              Custo Aluno-Hora por Diretoria Regional (R$)
+                            </h3>
+                            <span className="text-sm font-bold text-gray-400 bg-gray-200 px-3 py-1 rounded-full">{activeDRRank}º Menor Custo do Brasil</span>
+                          </div>
+                          
+                          <div style={{ width: '100%', height: '350px' }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart data={ranking} margin={{ top: 30, right: 90, left: 0, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                <XAxis dataKey="DR" axisLine={false} tickLine={false} tick={{ fill: '#4B5563', fontWeight: 'bold', fontSize: 11 }} />
+                                <YAxis hide domain={[0, 'dataMax + (dataMax * 0.15)']} />
+                                <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F3F4F6' }} />
+                                <Bar dataKey="Realizado" radius={[4, 4, 0, 0]} maxBarSize={45}>
+                                  {ranking.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.DR === selectedDR ? colors.brandPurple : colors.cardBg} />
+                                  ))}
+                                  <LabelList 
+                                    dataKey="Realizado" position="top" 
+                                    formatter={(val) => val === null || val === undefined ? '' : formatValue(val, rule.format).replace('R$ ', '')}
+                                    style={{ fill: '#4B5563', fontSize: '10px', fontWeight: 'bold' }}
+                                  />
+                                </Bar>
+                                {brasil && (
+                                  <ReferenceLine 
+                                    y={brasil.Realizado} stroke="#4B5563" strokeWidth={2} strokeDasharray="4 4" 
+                                    label={{ position: 'right', value: `Média BR: ${formatValue(brasil.Realizado, rule.format)}`, fill: '#4B5563', fontSize: 12, fontWeight: '900' }} 
+                                  />
+                                )}
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+
+                        {/* Gráfico 2: Composição Horas-Aluno Matrículas vs Gratuidade */}
+                        <div className="bg-gray-50 rounded-3xl p-6 border border-gray-200 shadow-inner">
+                          <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-gray-800">
+                            <span className="text-cyan-500"><Users size={24} /></span> 
+                            Composição de Horas-Aluno (Matrículas vs Gratuidade) por DR
+                          </h3>
+                          <div style={{ width: '100%', height: '400px' }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart data={ranking} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                <XAxis dataKey="DR" axisLine={false} tickLine={false} tick={{ fill: '#4B5563', fontWeight: 'bold', fontSize: 11 }} />
+                                <YAxis tickFormatter={(val) => formatLargeNumber(val)} axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 11, fontWeight: 'bold' }} />
+                                <Tooltip 
+                                  formatter={(value, name) => [formatLargeNumber(value) + ' h', name === 'mat' ? 'Matrículas' : 'Gratuidade']}
+                                  labelStyle={{ color: '#06B6D4', fontWeight: 'bold', marginBottom: '8px' }}
+                                  contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#fff', borderRadius: '0.5rem', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)' }}
+                                  itemStyle={{ fontWeight: 'bold', fontSize: '14px', paddingTop: '4px' }}
+                                />
+                                <Legend wrapperStyle={{ paddingTop: '10px', fontWeight: 'bold', fontSize: '13px', color: '#4B5563' }} />
+                                <Bar dataKey="mat" name="Horas-Aluno: Matrículas" stackId="a" fill="#06B6D4" radius={[0, 0, 4, 4]} maxBarSize={45}>
+                                    {ranking.map((entry, index) => (
+                                      <Cell key={`mat-${index}`} opacity={entry.DR === selectedDR ? 1 : 0.7} />
+                                    ))}
+                                    <LabelList dataKey="mat" position="inside" formatter={(val) => val > 0 ? formatLargeNumber(val) : ''} style={{ fill: '#ffffff', fontSize: '10px', fontWeight: 'bold', opacity: 0.9 }} />
+                                </Bar>
+                                <Bar dataKey="grat" name="Horas-Aluno: Gratuidade" stackId="a" fill="#3B82F6" radius={[4, 4, 0, 0]} maxBarSize={45}>
+                                    {ranking.map((entry, index) => (
+                                      <Cell key={`grat-${index}`} opacity={entry.DR === selectedDR ? 1 : 0.7} />
+                                    ))}
+                                    <LabelList dataKey="grat" position="inside" formatter={(val) => val > 0 ? formatLargeNumber(val) : ''} style={{ fill: '#ffffff', fontSize: '10px', fontWeight: 'bold', opacity: 0.9 }} />
+                                </Bar>
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+
+                      </div>
+                    </>
+                  )}
                 </>
               ) : (
                 <div className="flex items-center justify-center h-64 rounded-2xl mt-8 bg-gray-50 border-2 border-dashed border-gray-300">
@@ -493,7 +642,7 @@
 
               {/* RODAPÉ */}
               <footer className="mt-12 text-center text-xs font-medium pb-4 pt-6 text-gray-400 border-t border-gray-100">
-                Relatório Gerencial Analítico • Diretoria Regional de Goiás (DR-GO) • Monitoramento PEG (Jan a Mai 2026)
+                Relatório Gerencial Analítico • Diretoria Regional ({selectedDR}) • Monitoramento PEG e Gratuidade (Jan a Mai 2026)
               </footer>
             </div>
           );
