@@ -18,7 +18,7 @@
     <!-- Dependência do Recharts -->
     <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
     
-    <!-- Recharts (Versão 2.12.7 fixada, pois a 3.x apresenta instabilidade em builds UMD) -->
+    <!-- Recharts (Versão 2.12.7 fixada) -->
     <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
 
     <style>
@@ -33,176 +33,123 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // Importando os hooks do React global
         const { useState, useMemo, useEffect } = React;
-        
-        // Importando os componentes do Recharts global
         const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell, LabelList } = window.Recharts;
         
         // =========================================================================
-        // ÍCONES NATIVOS (Substituem o lucide-react para evitar erros de dependência)
+        // ÍCONES NATIVOS
         // =========================================================================
         const AlertCircle = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
-          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
-            <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         );
         const CheckCircle = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
-          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         );
         const TrendingUp = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
-          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
-            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline>
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
         );
         const Target = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
-          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
-            <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle>
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
         );
         const Award = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
-          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
-            <circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
         );
         const Info = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
-          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
-            <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
         );
         const Filter = ({ size = 24, color = "currentColor", className = "", style = {} }) => (
-          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
-            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
         );
 
-        // --- CONJUNTO DE DADOS EXPANDIDO ---
-        const rawData = [
-          // 1. Custo hora-aluno FIC+TEC presencial
-          { DR: 'BA', Meta: 13.04, Realizado: 13.29, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
-          { DR: 'CE', Meta: 11.21, Realizado: 12.88, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
-          { DR: 'GO', Meta: 10.06, Realizado: 10.04, Indicador: 'Custo hora-aluno FIC+TEC presencial' }, 
-          { DR: 'MG', Meta: 11.64, Realizado: 12.48, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
-          { DR: 'PR', Meta: 12.50, Realizado: 11.80, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
-          { DR: 'RJ', Meta: 13.20, Realizado: 14.50, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
-          { DR: 'SP', Meta: 10.50, Realizado: 11.20, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
-          { DR: 'BRASIL', Meta: 12.50, Realizado: 13.10, Indicador: 'Custo hora-aluno FIC+TEC presencial' },
-
-          // 2. Custo hora-aluno FIC+TEC semipresencial/EAD
-          { DR: 'BA', Meta: 8.50, Realizado: 8.10, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
-          { DR: 'CE', Meta: 8.50, Realizado: 7.90, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
-          { DR: 'GO', Meta: 8.50, Realizado: 8.65, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
-          { DR: 'MG', Meta: 8.50, Realizado: 8.20, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
-          { DR: 'PR', Meta: 8.50, Realizado: 7.50, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
-          { DR: 'SP', Meta: 8.50, Realizado: 8.80, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
-          { DR: 'BRASIL', Meta: 8.50, Realizado: 8.35, Indicador: 'Custo hora-aluno FIC+TEC semipresencial/EAD' },
-
-          // 3. % de Recursos destinados às atividades-fim
-          { DR: 'BA', Meta: 70, Realizado: 72, Indicador: '% de Recursos destinados às atividades-fim' },
-          { DR: 'CE', Meta: 70, Realizado: 75, Indicador: '% de Recursos destinados às atividades-fim' },
-          { DR: 'GO', Meta: 70, Realizado: 78, Indicador: '% de Recursos destinados às atividades-fim' },
-          { DR: 'MG', Meta: 70, Realizado: 71, Indicador: '% de Recursos destinados às atividades-fim' },
-          { DR: 'PR', Meta: 70, Realizado: 76, Indicador: '% de Recursos destinados às atividades-fim' },
-          { DR: 'SP', Meta: 70, Realizado: 68, Indicador: '% de Recursos destinados às atividades-fim' },
-          { DR: 'BRASIL', Meta: 70, Realizado: 73, Indicador: '% de Recursos destinados às atividades-fim' },
-
-          // 4. Impacto da folha de pessoal no orçamento
-          { DR: 'BA', Meta: 55, Realizado: 52, Indicador: 'Impacto da folha de pessoal no orçamento' },
-          { DR: 'CE', Meta: 55, Realizado: 50, Indicador: 'Impacto da folha de pessoal no orçamento' },
-          { DR: 'GO', Meta: 55, Realizado: 48, Indicador: 'Impacto da folha de pessoal no orçamento' },
-          { DR: 'MG', Meta: 55, Realizado: 56, Indicador: 'Impacto da folha de pessoal no orçamento' },
-          { DR: 'PR', Meta: 55, Realizado: 49, Indicador: 'Impacto da folha de pessoal no orçamento' },
-          { DR: 'SP', Meta: 55, Realizado: 58, Indicador: 'Impacto da folha de pessoal no orçamento' },
-          { DR: 'BRASIL', Meta: 55, Realizado: 53, Indicador: 'Impacto da folha de pessoal no orçamento' },
-
-          // 5. Sustentabilidade Operacional em Tecnologia e Inovação
-          { DR: 'BA', Meta: 100, Realizado: 95, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
-          { DR: 'CE', Meta: 100, Realizado: 105, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
-          { DR: 'GO', Meta: 100, Realizado: 110, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
-          { DR: 'MG', Meta: 100, Realizado: 98, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
-          { DR: 'PR', Meta: 100, Realizado: 115, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
-          { DR: 'SP', Meta: 100, Realizado: 120, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
-          { DR: 'BRASIL', Meta: 100, Realizado: 102, Indicador: 'Sustentabilidade Operacional em Tecnologia e Inovação' },
-
-          // 6. % de Conclusão nos cursos FIC presencial
-          { DR: 'BA', Meta: 85, Realizado: 86, Indicador: '% de Conclusão nos cursos FIC presencial' },
-          { DR: 'CE', Meta: 85, Realizado: 88, Indicador: '% de Conclusão nos cursos FIC presencial' },
-          { DR: 'GO', Meta: 85, Realizado: 83, Indicador: '% de Conclusão nos cursos FIC presencial' }, 
-          { DR: 'MG', Meta: 85, Realizado: 87, Indicador: '% de Conclusão nos cursos FIC presencial' },
-          { DR: 'PR', Meta: 85, Realizado: 90, Indicador: '% de Conclusão nos cursos FIC presencial' },
-          { DR: 'SP', Meta: 85, Realizado: 89, Indicador: '% de Conclusão nos cursos FIC presencial' },
-          { DR: 'BRASIL', Meta: 85, Realizado: 86, Indicador: '% de Conclusão nos cursos FIC presencial' },
-
-          // 7. % de Conclusão nos cursos FIC semipresencial/EAD
-          { DR: 'BA', Meta: 75, Realizado: 76, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
-          { DR: 'CE', Meta: 75, Realizado: 78, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
-          { DR: 'GO', Meta: 75, Realizado: 72, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' }, 
-          { DR: 'MG', Meta: 75, Realizado: 74, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
-          { DR: 'PR', Meta: 75, Realizado: 80, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
-          { DR: 'SP', Meta: 75, Realizado: 79, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
-          { DR: 'BRASIL', Meta: 75, Realizado: 77, Indicador: '% de Conclusão nos cursos FIC semipresencial/EAD' },
-
-          // 8. % de Conclusão nos cursos TEC semipresencial/EAD
-          { DR: 'BA', Meta: 70, Realizado: 65, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
-          { DR: 'CE', Meta: 70, Realizado: 68, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
-          { DR: 'GO', Meta: 70, Realizado: 71, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' }, 
-          { DR: 'MG', Meta: 70, Realizado: 66, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
-          { DR: 'PR', Meta: 70, Realizado: 72, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
-          { DR: 'SP', Meta: 70, Realizado: 69, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
-          { DR: 'BRASIL', Meta: 70, Realizado: 67, Indicador: '% de Conclusão nos cursos TEC semipresencial/EAD' },
-
-          // 9. Aumento da produtividade nas empresas atendidas por programas de produtividade industrial
-          { DR: 'BA', Meta: 0.20, Realizado: 0.31, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
-          { DR: 'CE', Meta: 0.20, Realizado: 0.28, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
-          { DR: 'GO', Meta: 0.20, Realizado: 0.48, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
-          { DR: 'MG', Meta: 0.20, Realizado: 0.35, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
-          { DR: 'PR', Meta: 0.20, Realizado: 0.53, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
-          { DR: 'SP', Meta: 0.20, Realizado: 0.41, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
-          { DR: 'BRASIL', Meta: 0.20, Realizado: 0.38, Indicador: 'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial' },
-
-          // 10. % de receita de tecnologia e inovação sobre a receita de contribuição compulsória
-          { DR: 'BA', Meta: 15, Realizado: 12, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
-          { DR: 'CE', Meta: 15, Realizado: 14, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
-          { DR: 'GO', Meta: 15, Realizado: 16, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
-          { DR: 'MG', Meta: 15, Realizado: 13, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
-          { DR: 'PR', Meta: 15, Realizado: 18, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
-          { DR: 'SP', Meta: 15, Realizado: 17, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
-          { DR: 'BRASIL', Meta: 15, Realizado: 14, Indicador: '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória' },
+        // =========================================================================
+        // EXTRAÇÃO EXATA DA TABELA ORIGINAL DO RELATÓRIO DO SENAI
+        // =========================================================================
+        const drsList = ["AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT", "PA", "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO", "BRASIL"];
+        
+        const indNames = [
+          'Custo hora-aluno FIC+TEC presencial',
+          'Custo hora-aluno FIC+TEC semipresencial/EaD',
+          '% de conclusão nos cursos FIC presencial',
+          '% de conclusão nos cursos TEC presencial',
+          '% de conclusão nos cursos FIC semipresencial e EaD',
+          '% de conclusão nos cursos TEC semipresencial e EaD',
+          'Percentual de recursos destinados às atividades-fim',
+          'Impacto da folha de pessoal no orçamento',
+          'Sustentabilidade operacional em Serviços de Tecnologia e Inovação',
+          '% da Receita de STI sobre a receita de contribuição compulsória',
+          'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial'
         ];
+
+        // Matriz de dados rigorosa extraída da imagem em anexo. 
+        // Cada linha é um DR, contém 22 valores na ordem dos indicadores (Meta, Realizado, Meta, Realizado...)
+        const dataMatrix = [
+          [14.96, 19.17, 10.26, 14.04, 89.1, 90.0, 80.0, 17.9, 75.5, 84.8, 52.5, null, 85.9, 85.9, 48.1, 49.4, 71.0, 46.9, 7.2, 1.1, 20.0, 139.3], // AC
+          [14.96, 19.92, 10.26, 13.82, 89.1, 90.7, 66.7, 0.0, 75.5, 99.5, 52.5, null, 85.9, 84.1, 61.0, 61.1, 62.0, 43.6, 6.8, 7.5, 20.0, 29.6], // AL
+          [14.96, 18.25, 10.26, 12.78, 91.5, 87.6, 65.7, 62.1, 75.5, 88.8, 52.5, 95.3, 85.9, 81.4, 48.1, 46.7, 58.8, 74.1, 4.3, 2.8, 20.0, 40.5], // AM
+          [14.96, 15.16, 10.26, 10.64, 89.1, 96.3, 65.7, 67.6, 85.4, 99.0, null, null, 85.9, 85.2, 48.1, 47.0, 71.0, 133.7, 6.8, 5.9, 20.0, 21.1], // AP
+          [13.04, 13.29, 8.73, 8.10, 89.1, 67.9, 65.7, 33.9, 75.5, 54.5, 54.2, 30.8, 94.2, 95.1, 48.1, 51.4, 87.3, 82.5, 102.0, 90.6, 20.0, 37.7], // BA
+          [11.21, 12.88, 9.02, 7.77, 89.3, 92.9, 65.7, 51.4, 75.5, 96.1, 66.7, 52.4, 85.9, 85.9, 48.1, 60.7, 71.0, 78.1, 16.6, 20.0, 20.0, 31.9], // CE
+          [14.96, 18.03, 10.26, 11.70, 89.1, 70.2, 65.7, 41.9, 75.5, 71.2, 52.5, 27.7, 85.9, 93.1, 48.1, 56.5, 71.0, 31.2, 10.9, 2.6, 20.0, 43.2], // DF
+          [14.96, 14.90, 10.26, 12.07, 89.1, 87.0, 69.8, 72.7, 75.5, 96.8, 52.5, 0.0, 85.9, 87.2, 48.1, 49.1, 71.0, 64.9, 8.7, 2.7, 20.0, 53.9], // ES
+          [10.06, 10.04, 4.07, 5.10, 91.0, 84.3, 65.7, 42.1, 75.5, 64.8, 52.5, 31.3, 89.4, 93.1, 39.1, 50.3, 71.0, 78.5, 13.1, 7.9, 20.0, 38.4], // GO
+          [10.47, 12.16, 7.17, 9.88, 93.0, 95.5, 65.7, 62.3, 75.5, 87.4, 52.5, 35.8, 85.9, 89.4, 48.1, 51.5, 71.0, 74.4, 1.0, 2.9, 20.0, 33.7], // MA
+          [11.64, 12.48, 10.26, 5.73, 89.1, 91.4, 65.7, 49.2, 75.5, 91.9, 52.5, 35.4, 87.4, 93.1, 47.5, 46.0, 100.7, 77.9, 17.8, 9.2, 20.0, 34.5], // MG
+          [14.96, 12.79, 10.26, 9.24, 89.1, 83.9, 65.7, 34.2, 75.5, 95.6, 52.5, 20.2, 86.8, 88.3, 48.1, 66.3, 71.0, 57.2, 37.6, 11.9, 20.0, 39.5], // MS
+          [14.96, 15.80, 10.26, 11.60, 89.1, 93.9, 65.7, 49.3, 75.5, 54.0, 52.5, null, 85.9, 88.0, 48.1, 56.9, 71.0, 76.2, 11.5, 5.2, 20.0, 33.6], // MT
+          [13.55, 11.22, 9.17, 10.43, 89.1, 89.6, 65.7, 78.1, 75.5, 93.3, 52.5, null, 85.9, 85.3, 48.1, 59.0, 71.0, 14.5, 16.1, 0.8, 20.0, 41.2], // PA
+          [14.96, 14.85, 10.26, 9.28, 89.1, 87.8, 65.7, 41.7, 75.5, 93.5, 52.5, 25.8, 85.9, 86.2, 48.1, 49.6, 71.0, 60.9, 14.3, 6.4, 20.0, 59.9], // PB
+          [11.74, 14.09, 9.08, 11.16, 89.1, 92.1, 65.7, 35.0, 75.5, 74.5, 52.5, 28.6, 85.9, 92.4, 48.1, 46.4, 72.0, 146.1, 34.1, 18.2, 20.0, 34.9], // PE
+          [14.96, 25.08, 10.26, 24.95, 89.1, 80.7, 65.7, 0.0, 75.5, 66.7, null, null, 85.9, 70.8, 48.1, 42.6, 58.8, 2.8, 6.8, 0.2, 20.0, 37.0], // PI
+          [14.96, 15.41, 10.26, 8.80, 89.1, 78.3, 70.2, 26.8, 75.5, 64.5, 52.5, 25.0, 85.9, 93.1, 48.1, 44.8, 80.0, 113.3, 34.2, 15.6, 20.0, 53.6], // PR
+          [14.96, 11.37, 11.36, 8.12, 89.1, 73.9, 65.7, 63.4, 83.3, 66.6, 52.5, 66.7, 85.9, 86.8, 52.7, 53.4, 69.0, 73.6, 12.0, 9.0, 20.0, 57.3], // RJ
+          [12.48, 15.91, 8.49, 16.14, 89.1, 91.3, 65.7, 36.9, 75.5, 94.8, 52.5, 0.0, 85.9, 91.9, 48.1, 49.3, 81.4, 92.0, 50.0, 27.6, 20.0, 42.1], // RN
+          [11.21, 7.41, 7.47, 5.56, 89.1, 93.2, 65.7, 16.7, 75.5, 98.9, 52.5, 35.5, 85.9, 90.0, 38.9, 38.5, 71.0, 40.6, 1.0, 1.8, 20.0, 37.4], // RO
+          [14.96, 16.31, 10.26, 12.59, 89.1, 89.4, 65.7, null, 77.4, 95.9, 52.5, null, 85.9, 80.7, 48.1, 51.1, 58.8, 29.5, 1.0, 0.7, 20.0, 26.2], // RR
+          [14.96, 14.85, 10.26, 10.80, 89.1, 93.4, 65.7, 61.5, 85.6, 97.7, 52.5, 52.0, 85.9, 91.8, 48.1, 61.0, 71.0, 75.0, 24.5, 11.0, 20.0, 46.3], // RS
+          [14.96, 13.56, 10.26, 9.91, 89.9, 77.3, 65.7, 46.3, 85.1, 62.1, 52.5, 33.3, 85.9, 90.6, 51.7, 57.7, 71.2, 82.7, 46.4, 26.9, 20.0, 34.1], // SC
+          [14.96, 12.16, 8.45, 12.09, 89.1, 77.8, 65.7, 60.0, 87.5, 100.0, 52.5, 38.9, 85.9, 89.7, 48.1, 48.0, 58.8, 52.2, 1.0, 0.5, 20.0, 61.4], // SE
+          [22.24, 21.58, 11.59, 9.22, 89.1, 91.6, 72.5, 78.9, 75.5, 79.4, 52.6, 75.0, 93.3, 96.2, 74.0, 63.0, 37.4, 76.7, 6.9, 4.6, 20.0, 41.3], // SP
+          [14.96, 15.12, 10.26, 10.41, 89.1, 87.5, 65.7, 51.3, 75.5, 79.7, 52.5, 50.0, 85.9, 87.9, 48.1, 50.5, 71.0, 77.6, 1.0, 0.7, 20.0, 25.2], // TO
+          [14.96, 15.45, 10.26, 8.55, 89.1, 87.6, 65.7, 50.1, 75.5, 78.3, 52.5, 37.6, 85.9, 92.0, 48.1, 55.2, 71.0, 79.9, 18.8, 11.4, 20.0, 39.2], // BRASIL
+        ];
+
+        const rawData = [];
+        drsList.forEach((dr, i) => {
+          indNames.forEach((ind, j) => {
+            rawData.push({
+              DR: dr,
+              Indicador: ind,
+              Meta: dataMatrix[i][j*2],
+              Realizado: dataMatrix[i][j*2 + 1]
+            });
+          });
+        });
 
         const indicatorRules = {
           'Custo hora-aluno FIC+TEC presencial': { isHigherBetter: false, format: 'currency' },
-          'Custo hora-aluno FIC+TEC semipresencial/EAD': { isHigherBetter: false, format: 'currency' },
-          '% de Recursos destinados às atividades-fim': { isHigherBetter: true, format: 'percent' },
+          'Custo hora-aluno FIC+TEC semipresencial/EaD': { isHigherBetter: false, format: 'currency' },
+          '% de conclusão nos cursos FIC presencial': { isHigherBetter: true, format: 'percent' },
+          '% de conclusão nos cursos TEC presencial': { isHigherBetter: true, format: 'percent' },
+          '% de conclusão nos cursos FIC semipresencial e EaD': { isHigherBetter: true, format: 'percent' },
+          '% de conclusão nos cursos TEC semipresencial e EaD': { isHigherBetter: true, format: 'percent' },
+          'Percentual de recursos destinados às atividades-fim': { isHigherBetter: true, format: 'percent' },
           'Impacto da folha de pessoal no orçamento': { isHigherBetter: false, format: 'percent' },
-          'Sustentabilidade Operacional em Tecnologia e Inovação': { isHigherBetter: true, format: 'percent' },
-          '% de Conclusão nos cursos FIC presencial': { isHigherBetter: true, format: 'percent' },
-          '% de Conclusão nos cursos FIC semipresencial/EAD': { isHigherBetter: true, format: 'percent' },
-          '% de Conclusão nos cursos TEC semipresencial/EAD': { isHigherBetter: true, format: 'percent' },
-          'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial': { isHigherBetter: true, format: 'percent_decimal' },
-          '% de receita de tecnologia e inovação sobre a receita de contribuição compulsória': { isHigherBetter: true, format: 'percent' }
+          'Sustentabilidade operacional em Serviços de Tecnologia e Inovação': { isHigherBetter: true, format: 'percent' },
+          '% da Receita de STI sobre a receita de contribuição compulsória': { isHigherBetter: true, format: 'percent' },
+          'Aumento da produtividade nas empresas atendidas por programas de produtividade industrial': { isHigherBetter: true, format: 'percent' }
         };
 
         const allIndicators = Object.keys(indicatorRules);
 
         const colors = {
-          bg: '#FFFFFF',
-          text: '#1F2937', 
-          cardBg: '#374151', 
-          cyan: '#06B6D4', 
-          success: '#10B981',
-          warning: '#EF4444'
+          bg: '#FFFFFF', text: '#1F2937', cardBg: '#374151', cyan: '#06B6D4', success: '#10B981', warning: '#EF4444'
         };
 
-        // Formatação robusta de números
         const formatValue = (val, formatType) => {
           if (val === undefined || val === null || isNaN(val)) return '-';
           const numVal = Number(val);
           if (formatType === 'currency') return `R$ ${numVal.toFixed(2).replace('.', ',')}`;
-          if (formatType === 'percent_decimal') return `${(numVal * 100).toFixed(1).replace('.', ',')}%`;
-          if (formatType === 'percent') return `${numVal.toFixed(0)}%`;
+          if (formatType === 'percent') return `${numVal.toFixed(1).replace('.', ',')}%`;
           return numVal;
         };
 
@@ -215,7 +162,7 @@
             allIndicators.forEach(ind => {
               const rule = indicatorRules[ind];
               const goData = rawData.find(d => d.Indicador === ind && d.DR === 'GO');
-              if (!goData) {
+              if (!goData || goData.Realizado === null) {
                 statusMap[ind] = 'Sem Dados';
               } else {
                 const achieved = rule.isHigherBetter ? goData.Realizado >= goData.Meta : goData.Realizado <= goData.Meta;
@@ -241,21 +188,26 @@
             const brasilData = rawData.find(d => d.Indicador === selectedIndicator && d.DR === 'BRASIL');
             const rule = indicatorRules[selectedIndicator] || { isHigherBetter: true, format: 'percent' };
 
-            filtered.sort((a, b) => rule.isHigherBetter ? b.Realizado - a.Realizado : a.Realizado - b.Realizado);
+            // Ordenação correta lidando com nulls
+            filtered.sort((a, b) => {
+              const valA = a.Realizado !== null ? a.Realizado : (rule.isHigherBetter ? -Infinity : Infinity);
+              const valB = b.Realizado !== null ? b.Realizado : (rule.isHigherBetter ? -Infinity : Infinity);
+              return rule.isHigherBetter ? valB - valA : valA - valB;
+            });
             return { ranking: filtered, brasil: brasilData, rule };
           }, [selectedIndicator]);
 
           const { ranking, brasil, rule } = processedData;
           const goiasData = ranking.find(d => d.DR === 'GO');
           
-          const targetAchieved = goiasData 
+          const targetAchieved = goiasData && goiasData.Realizado !== null 
             ? (rule.isHigherBetter ? goiasData.Realizado >= goiasData.Meta : goiasData.Realizado <= goiasData.Meta)
             : false;
 
-          const goiasRank = ranking.findIndex(d => d.DR === 'GO') + 1;
+          const goiasRank = goiasData && goiasData.Realizado !== null ? ranking.findIndex(d => d.DR === 'GO') + 1 : 0;
 
           const generateInsights = () => {
-            if (!goiasData) return { points: [], attention: [] };
+            if (!goiasData || goiasData.Realizado === null) return { points: [], attention: ['Sem dados disponíveis para o Estado de Goiás neste indicador.'] };
 
             const diffToMeta = Math.abs(goiasData.Realizado - goiasData.Meta);
             const pctDiffToMeta = goiasData.Meta !== 0 ? (diffToMeta / goiasData.Meta) * 100 : 0;
@@ -275,16 +227,17 @@
               attention.push(`Recomenda-se revisão estratégica focada em ${rule.isHigherBetter ? 'alavancar processos produtivos' : 'contenção de custos e eficiência operacional'}.`);
             }
 
-            const topTertile = Math.ceil(ranking.length / 3);
+            const validRanks = ranking.filter(d => d.Realizado !== null).length;
+            const topTertile = Math.ceil(validRanks / 3);
             if (goiasRank <= topTertile && goiasRank > 0) {
-              points.push(`O DR Goiás é destaque nacional, ocupando a ${goiasRank}ª posição entre os estados analisados, refletindo alta competitividade.`);
-            } else if (goiasRank > ranking.length - topTertile) {
-              attention.push(`No ranking nacional, o estado está no terço inferior (${goiasRank}º lugar), indicando oportunidade de benchmarking com outros DRs.`);
+              points.push(`O DR Goiás é destaque nacional, ocupando a ${goiasRank}ª posição entre os ${validRanks} estados analisados.`);
+            } else if (goiasRank > validRanks - topTertile) {
+              attention.push(`No ranking nacional, o estado está no terço inferior (${goiasRank}º lugar), indicando oportunidade de benchmarking.`);
             } else if (goiasRank > 0) {
-              points.push(`O estado mantém uma posição intermediária (${goiasRank}º lugar) no cenário nacional, apresentando estabilidade.`);
+              points.push(`O estado mantém uma posição intermediária (${goiasRank}º lugar) no cenário nacional.`);
             }
 
-            if (brasil) {
+            if (brasil && brasil.Realizado !== null) {
               const betterThanBr = rule.isHigherBetter ? goiasData.Realizado > brasil.Realizado : goiasData.Realizado < brasil.Realizado;
               if (betterThanBr) {
                 points.push(`A performance estadual supera a média nacional do sistema SENAI (${formatValue(brasil.Realizado, rule.format)}).`);
@@ -313,7 +266,7 @@
           };
 
           return (
-            <div className="min-h-screen bg-white text-gray-800 p-4 md:p-8 w-full">
+            <div className="min-h-screen bg-white text-gray-800 p-4 md:p-8 w-full font-sans">
               {/* CABEÇALHO E FILTROS */}
               <header className="mb-8 flex flex-col xl:flex-row justify-between items-start xl:items-center border-b-2 border-gray-200 pb-6 gap-6">
                 <div>
@@ -328,7 +281,7 @@
                 <div className="flex flex-col gap-4 w-full xl:w-auto">
                   <div className="flex flex-wrap gap-2 items-center">
                     <span className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1 mr-2">
-                      <Filter size={14} /> Filtro de Desempenho:
+                      <Filter size={14} /> Filtro de Desempenho (GO):
                     </span>
                     {['Todos', 'Destaques', 'Atenção'].map(cat => (
                       <button
@@ -349,7 +302,7 @@
 
                   {filteredIndicatorsList.length > 0 ? (
                     <select 
-                      className="w-full xl:w-96 rounded-lg p-3 outline-none font-medium cursor-pointer shadow-lg transition-all text-sm bg-gray-800 text-white border-none"
+                      className="w-full xl:w-[28rem] rounded-lg p-3 outline-none font-medium cursor-pointer shadow-lg transition-all text-sm bg-gray-800 text-white border-none"
                       value={selectedIndicator}
                       onChange={(e) => setSelectedIndicator(e.target.value)}
                     >
@@ -376,13 +329,13 @@
                       <p className="text-sm mt-2 font-medium text-cyan-400">Meta: {formatValue(goiasData.Meta, rule.format)}</p>
                     </div>
 
-                    <div className={`p-6 rounded-2xl shadow-lg relative overflow-hidden bg-gray-800 border-l-4 ${targetAchieved ? 'border-emerald-500' : 'border-red-500'}`}>
-                      <div className="absolute top-0 right-0 p-4 opacity-20"><Award size={48} color={targetAchieved ? '#10B981' : '#EF4444'}/></div>
+                    <div className={`p-6 rounded-2xl shadow-lg relative overflow-hidden bg-gray-800 border-l-4 ${goiasData.Realizado === null ? 'border-gray-500' : targetAchieved ? 'border-emerald-500' : 'border-red-500'}`}>
+                      <div className="absolute top-0 right-0 p-4 opacity-20"><Award size={48} color={goiasData.Realizado === null ? '#9CA3AF' : targetAchieved ? '#10B981' : '#EF4444'}/></div>
                       <p className="text-sm font-bold uppercase tracking-wider mb-1 text-gray-400">Estado da Meta</p>
                       <div className="flex items-center gap-2 mt-1">
-                        {targetAchieved ? <CheckCircle color="#10B981" size={28}/> : <AlertCircle color="#EF4444" size={28}/>}
-                        <h2 className={`text-2xl font-black ${targetAchieved ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {targetAchieved ? 'Destaque Alcançado' : 'Ponto de Atenção'}
+                        {goiasData.Realizado === null ? <Info color="#9CA3AF" size={28}/> : targetAchieved ? <CheckCircle color="#10B981" size={28}/> : <AlertCircle color="#EF4444" size={28}/>}
+                        <h2 className={`text-2xl font-black ${goiasData.Realizado === null ? 'text-gray-400' : targetAchieved ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {goiasData.Realizado === null ? 'Sem Dados' : targetAchieved ? 'Destaque Alcançado' : 'Ponto de Atenção'}
                         </h2>
                       </div>
                       <p className="text-xs mt-2 text-gray-400">{rule.isHigherBetter ? 'Maior é melhor' : 'Menor é melhor'}</p>
@@ -393,7 +346,7 @@
                       <p className="text-sm font-bold uppercase tracking-wider mb-1 text-gray-400">Ranking Nacional</p>
                       <div className="flex items-baseline gap-1">
                         <h2 className="text-3xl font-black text-white">{goiasRank > 0 ? `${goiasRank}º` : '-'}</h2>
-                        <span className="font-medium text-gray-400">/ {ranking.length}</span>
+                        <span className="font-medium text-gray-400">/ {ranking.filter(r => r.Realizado !== null).length}</span>
                       </div>
                     </div>
 
@@ -414,38 +367,41 @@
                         Ranking de Desempenho por Estado
                       </h3>
                       
-                      <div style={{ width: '100%', height: '400px' }}>
+                      <div style={{ width: '100%', height: '420px' }}>
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={ranking} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                          <BarChart data={ranking} margin={{ top: 30, right: 10, left: 0, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                             <XAxis 
                               dataKey="DR" 
                               axisLine={false} 
                               tickLine={false} 
-                              tick={{ fill: '#4B5563', fontWeight: 'bold' }} 
+                              tick={{ fill: '#4B5563', fontWeight: 'bold', fontSize: 11 }} 
                             />
-                            <YAxis hide domain={[0, 'dataMax + (dataMax * 0.1)']} />
+                            <YAxis hide domain={[0, 'dataMax + (dataMax * 0.15)']} />
                             <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F3F4F6' }} />
                             
                             <ReferenceLine 
                               y={goiasData.Meta} 
                               stroke="#4B5563" 
                               strokeDasharray="5 5" 
-                              label={{ position: 'top', value: `Meta: ${formatValue(goiasData.Meta, rule.format)}`, fill: '#4B5563', fontSize: 12, fontWeight: 'bold' }} 
+                              label={{ position: 'top', value: `Meta GO: ${formatValue(goiasData.Meta, rule.format)}`, fill: '#4B5563', fontSize: 12, fontWeight: 'bold' }} 
                             />
                             
-                            <Bar dataKey="Realizado" radius={[6, 6, 0, 0]} maxBarSize={50}>
+                            <Bar dataKey="Realizado" radius={[4, 4, 0, 0]} maxBarSize={45}>
                               {ranking.map((entry, index) => (
                                 <Cell 
                                   key={`cell-${index}`} 
-                                  fill={entry.DR === 'GO' ? (targetAchieved ? colors.success : colors.warning) : colors.cardBg} 
+                                  fill={entry.Realizado === null ? 'transparent' : entry.DR === 'GO' ? (targetAchieved ? colors.success : colors.warning) : colors.cardBg} 
                                 />
                               ))}
                               <LabelList 
                                 dataKey="Realizado" 
                                 position="top" 
-                                formatter={(val) => formatValue(val, rule.format).replace('R$', '').replace('%', '')}
-                                style={{ fill: '#4B5563', fontSize: '11px', fontWeight: 'bold' }}
+                                formatter={(val) => {
+                                  if (val === null || val === undefined) return '';
+                                  return formatValue(val, rule.format).replace('R$ ', '').replace('%', '');
+                                }}
+                                style={{ fill: '#4B5563', fontSize: '10px', fontWeight: 'bold' }}
                               />
                             </Bar>
                           </BarChart>
@@ -505,13 +461,12 @@
 
               {/* RODAPÉ */}
               <footer className="mt-12 text-center text-xs font-medium pb-4 pt-6 text-gray-400 border-t border-gray-100">
-                Relatório Gerencial • Baseado nas métricas PEG Janeiro a Maio de 2026 • Inteligência de Dados
+                Relatório Gerencial Analítico • Diretoria Regional de Goiás (DR-GO) • Monitoramento PEG (Jan a Mai 2026)
               </footer>
             </div>
           );
         }
 
-        // Renderização do React na div #root
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
