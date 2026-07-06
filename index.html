@@ -81,7 +81,6 @@
         ];
 
         // Matriz de dados rigorosa extraída da imagem em anexo. 
-        // Cada linha é um DR, contém 22 valores na ordem dos indicadores (Meta, Realizado, Meta, Realizado...)
         const dataMatrix = [
           [14.96, 19.17, 10.26, 14.04, 89.1, 90.0, 80.0, 17.9, 75.5, 84.8, 52.5, null, 85.9, 85.9, 48.1, 49.4, 71.0, 46.9, 7.2, 1.1, 20.0, 139.3], // AC
           [14.96, 19.92, 10.26, 13.82, 89.1, 90.7, 66.7, 0.0, 75.5, 99.5, 52.5, null, 85.9, 84.1, 61.0, 61.1, 62.0, 43.6, 6.8, 7.5, 20.0, 29.6], // AL
@@ -141,8 +140,15 @@
 
         const allIndicators = Object.keys(indicatorRules);
 
+        // Indicadores que o Relatório Oficial (PDF) apontou como fora da meta no cenário BRASIL
+        const indicatorsBelowNationalTarget = [
+          '% da Receita de STI sobre a receita de contribuição compulsória',
+          '% de conclusão nos cursos TEC presencial',
+          '% de conclusão nos cursos TEC semipresencial e EaD'
+        ];
+
         const colors = {
-          bg: '#FFFFFF', text: '#1F2937', cardBg: '#374151', cyan: '#06B6D4', success: '#10B981', warning: '#EF4444'
+          bg: '#FFFFFF', text: '#1F2937', cardBg: '#374151', cyan: '#06B6D4', success: '#10B981', warning: '#EF4444', metaLine: '#EA580C'
         };
 
         const formatValue = (val, formatType) => {
@@ -215,34 +221,49 @@
             let points = [];
             let attention = [];
 
+            // Contexto com base no relatório oficial do SENAI
+            const isNationalChallenge = indicatorsBelowNationalTarget.includes(selectedIndicator);
+
             if (targetAchieved) {
-              points.push(`Goiás cumpriu a meta estipulada (${formatValue(goiasData.Meta, rule.format)}), registando ${formatValue(goiasData.Realizado, rule.format)}.`);
+              points.push(`O resultado registrado (${formatValue(goiasData.Realizado, rule.format)}) cumpriu com sucesso a meta estipulada (${formatValue(goiasData.Meta, rule.format)}).`);
+              
+              if (isNationalChallenge) {
+                points.push(`Resiliência Comprovada: Embora este indicador tenha ficado abaixo da margem no consolidado do Brasil, o DR-GO superou o desafio sistêmico e atingiu a meta estabelecida.`);
+              } else {
+                 points.push(`O estado acompanha o bom desempenho da rede, já que este indicador também alcançou as metas sistêmicas no panorama Brasil.`);
+              }
+
               if (pctDiffToMeta > 10) {
                 points.push(rule.isHigherBetter 
                   ? `Desempenho de excelência, superando a meta em mais de ${pctDiffToMeta.toFixed(0)}%.`
-                  : `Otimização de alta eficiência, com resultado ${pctDiffToMeta.toFixed(0)}% melhor que o teto da meta.`);
+                  : `Otimização de alta eficiência, operando com margem de ${pctDiffToMeta.toFixed(0)}% de folga em relação ao teto da meta.`);
               }
             } else {
-              attention.push(`O resultado atual de ${formatValue(goiasData.Realizado, rule.format)} está fora da meta ideal de ${formatValue(goiasData.Meta, rule.format)}.`);
-              attention.push(`Recomenda-se revisão estratégica focada em ${rule.isHigherBetter ? 'alavancar processos produtivos' : 'contenção de custos e eficiência operacional'}.`);
+              attention.push(`O resultado atual de ${formatValue(goiasData.Realizado, rule.format)} está fora da meta ideal/esperada de ${formatValue(goiasData.Meta, rule.format)}.`);
+              
+              if (isNationalChallenge) {
+                attention.push(`Desafio Sistêmico: Este indicador figurou fora da meta também no consolidado nacional (Brasil), revelando uma dificuldade estrutural da rede que afeta diretamente as operações em Goiás.`);
+              } else {
+                attention.push(`Recomenda-se revisão estratégica focada em ${rule.isHigherBetter ? 'alavancar os processos de atração, retenção e produtividade' : 'contenção de custos e eficiência operacional'} para alinhar os resultados às metas.`);
+              }
             }
 
             const validRanks = ranking.filter(d => d.Realizado !== null).length;
             const topTertile = Math.ceil(validRanks / 3);
             if (goiasRank <= topTertile && goiasRank > 0) {
-              points.push(`O DR Goiás é destaque nacional, ocupando a ${goiasRank}ª posição entre os ${validRanks} estados analisados.`);
+              points.push(`O DR Goiás ganha destaque, ocupando a ${goiasRank}ª posição em eficiência dentre os ${validRanks} estados analisados.`);
             } else if (goiasRank > validRanks - topTertile) {
-              attention.push(`No ranking nacional, o estado está no terço inferior (${goiasRank}º lugar), indicando oportunidade de benchmarking.`);
+              attention.push(`No ranking nacional, o estado encontra-se no terço inferior (${goiasRank}º lugar), sinalizando oportunidades de benchmarking com outros DRs.`);
             } else if (goiasRank > 0) {
-              points.push(`O estado mantém uma posição intermediária (${goiasRank}º lugar) no cenário nacional.`);
+              points.push(`O estado mantém uma posição intermediária saudável (${goiasRank}º lugar) no cenário nacional.`);
             }
 
             if (brasil && brasil.Realizado !== null) {
               const betterThanBr = rule.isHigherBetter ? goiasData.Realizado > brasil.Realizado : goiasData.Realizado < brasil.Realizado;
               if (betterThanBr) {
-                points.push(`A performance estadual supera a média nacional do sistema SENAI (${formatValue(brasil.Realizado, rule.format)}).`);
+                points.push(`A performance estadual goiana é mais eficiente do que a média consolidada do sistema SENAI Brasil (${formatValue(brasil.Realizado, rule.format)}).`);
               } else {
-                attention.push(`Indicador performando de forma menos eficiente do que a média consolidada do Brasil (${formatValue(brasil.Realizado, rule.format)}).`);
+                attention.push(`A performance pontual deste indicador demonstrou-se menos eficiente do que a média aferida em nível Brasil (${formatValue(brasil.Realizado, rule.format)}).`);
               }
             }
 
@@ -258,7 +279,7 @@
                 <div className="bg-gray-800 text-white p-4 rounded-lg shadow-xl border border-gray-700">
                   <p className="font-bold text-cyan-500 mb-2">{label === 'GO' ? '📍 DR GOIÁS' : `DR ${label}`}</p>
                   <p className="text-sm">Realizado: <span className="font-bold">{formatValue(data.Realizado, rule.format)}</span></p>
-                  <p className="text-sm text-gray-400">Meta: {formatValue(data.Meta, rule.format)}</p>
+                  <p className="text-sm text-gray-400">Meta: <span className="text-orange-400 font-semibold">{formatValue(data.Meta, rule.format)}</span></p>
                 </div>
               );
             }
@@ -326,7 +347,7 @@
                       <div className="absolute top-0 right-0 p-4 opacity-20"><Target size={48} color="#06B6D4"/></div>
                       <p className="text-sm font-bold uppercase tracking-wider mb-1 text-gray-400">Resultado GO</p>
                       <h2 className="text-3xl font-black text-white">{formatValue(goiasData.Realizado, rule.format)}</h2>
-                      <p className="text-sm mt-2 font-medium text-cyan-400">Meta: {formatValue(goiasData.Meta, rule.format)}</p>
+                      <p className="text-sm mt-2 font-medium text-orange-400">Meta: {formatValue(goiasData.Meta, rule.format)}</p>
                     </div>
 
                     <div className={`p-6 rounded-2xl shadow-lg relative overflow-hidden bg-gray-800 border-l-4 ${goiasData.Realizado === null ? 'border-gray-500' : targetAchieved ? 'border-emerald-500' : 'border-red-500'}`}>
@@ -367,9 +388,10 @@
                         Ranking de Desempenho por Estado
                       </h3>
                       
-                      <div style={{ width: '100%', height: '420px' }}>
+                      <div style={{ width: '100%', height: '440px' }}>
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={ranking} margin={{ top: 30, right: 10, left: 0, bottom: 5 }}>
+                          {/* Aumentei a margem direita (right) para 90 para garantir que o rótulo caiba inteiro fora da grade de barras */}
+                          <BarChart data={ranking} margin={{ top: 40, right: 90, left: 0, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                             <XAxis 
                               dataKey="DR" 
@@ -377,15 +399,9 @@
                               tickLine={false} 
                               tick={{ fill: '#4B5563', fontWeight: 'bold', fontSize: 11 }} 
                             />
+                            {/* Um domínio maior para o Y evitar sobreposições verticais */}
                             <YAxis hide domain={[0, 'dataMax + (dataMax * 0.15)']} />
                             <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F3F4F6' }} />
-                            
-                            <ReferenceLine 
-                              y={goiasData.Meta} 
-                              stroke="#4B5563" 
-                              strokeDasharray="5 5" 
-                              label={{ position: 'top', value: `Meta GO: ${formatValue(goiasData.Meta, rule.format)}`, fill: '#4B5563', fontSize: 12, fontWeight: 'bold' }} 
-                            />
                             
                             <Bar dataKey="Realizado" radius={[4, 4, 0, 0]} maxBarSize={45}>
                               {ranking.map((entry, index) => (
@@ -404,6 +420,22 @@
                                 style={{ fill: '#4B5563', fontSize: '10px', fontWeight: 'bold' }}
                               />
                             </Bar>
+
+                            {/* ReferenceLine movido DEPOIS das barras para ficar por cima (trazer pra frente). 
+                                Posição 'right' coloca o texto confortavelmente fora do gráfico graças ao margin-right maior. */}
+                            <ReferenceLine 
+                              y={goiasData.Meta} 
+                              stroke={colors.metaLine} 
+                              strokeWidth={2}
+                              strokeDasharray="4 4" 
+                              label={{ 
+                                position: 'right', 
+                                value: `Meta: ${formatValue(goiasData.Meta, rule.format)}`, 
+                                fill: colors.metaLine, 
+                                fontSize: 12, 
+                                fontWeight: '900' 
+                              }} 
+                            />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
@@ -414,14 +446,14 @@
                       <div className="rounded-3xl p-6 shadow-xl flex-1 flex flex-col bg-gray-800">
                         <h3 className="text-xl font-bold mb-6 flex items-center gap-2 pb-4 text-white border-b border-gray-700">
                           <span className="text-cyan-500"><TrendingUp size={24} /></span>
-                          Insights Estratégicos DR-GO
+                          Análise Estratégica
                         </h3>
                         
                         <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                           {insights.points.length > 0 && (
                             <div className="mb-6">
                               <h4 className="font-bold uppercase text-xs tracking-widest mb-3 flex items-center gap-2 text-emerald-400">
-                                <CheckCircle size={16} /> Pontos Positivos
+                                <CheckCircle size={16} /> Fatos Positivos e Oportunidades
                               </h4>
                               <ul className="flex flex-col gap-3">
                                 {insights.points.map((point, i) => (
@@ -436,7 +468,7 @@
                           {insights.attention.length > 0 && (
                             <div>
                               <h4 className="font-bold uppercase text-xs tracking-widest mb-3 flex items-center gap-2 text-red-400">
-                                <AlertCircle size={16} /> Pontos de Atenção
+                                <AlertCircle size={16} /> Atenção e Desafios
                               </h4>
                               <ul className="flex flex-col gap-3">
                                 {insights.attention.map((att, i) => (
